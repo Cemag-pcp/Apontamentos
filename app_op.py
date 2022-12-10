@@ -177,7 +177,7 @@ def page2():
     def finalizar_op(n_op):    
         
         name_sheet = 'Banco de dados OP'
-        worksheet = 'Finalizadas'
+        worksheet = 'Criadas'
         
         sh = sa.open(name_sheet)
         wks = sh.worksheet(worksheet)
