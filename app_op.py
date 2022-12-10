@@ -124,15 +124,7 @@ def page1():
             planilha.update('A1', 'Ordem de Produção - PLASMA')
             planilha.format('A1', {'textFormat': {'bold': True, "fontSize": 25},
                                    "horizontalAlignment":"CENTER", "verticalAlignment":"MIDDLE"})
-        
-    # =============================================================================
-    #         url = 'https://drive.google.com/file/d/18o3wyOzID9Z-xooQ0KuNsONay-WzKgKo'
-    #         
-    #         picture = [f'=IMAGE("{url}",4,100,100)']
-    #         planilha.insert_row(picture,1)
-    #         planilha.insert_row(picture, 3, 'USER_ENTERED')
-    # 
-    # =============================================================================
+         
             # Criando colunas na tabela para guardar no bando de dados
             
             df['espessura'] = espessura_list[0][0]
@@ -141,7 +133,6 @@ def page1():
             df['qt. chapas'] = qt_chapa_list[0][0]
             df['op'] = n_op
             df['data criada'] = date.today().strftime('%d/%m/%Y')
-
             
             # reordenar colunas
             
@@ -170,14 +161,13 @@ def page1():
     
     if st.button('Gerar OP'):
         create_op(df, n_op)
+    
         st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
 
-    
-
 def page2():
-         
-         st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Finalizar OP - Plasma</h2>", unsafe_allow_html=True)
-
+    
+    st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Finalizar OP - Plasma</h2>", unsafe_allow_html=True)
+    
     def finalizar_op(n_op):    
         
         name_sheet = 'Banco de dados OP'
@@ -260,6 +250,15 @@ def page2():
 def page3():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Apontar OP - Plasma</h2>", unsafe_allow_html=True)
+
+    n_op = st.text_input("Digite a op")    
+
+
+
+
+
+
+
 
 page_names_to_funcs = {
     "Criar OP": page1,
