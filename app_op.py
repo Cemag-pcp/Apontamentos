@@ -159,12 +159,13 @@ def page1():
         df = pd.read_excel(uploaded_file)
         name_file = uploaded_file.name
         name_file = name_file[2:7]
-        n_op = name_file
+        n_op = name_file            
     
-    if st.button('Gerar OP'):
-        create_op(df, n_op)
-    
-        st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
+        if n_op != '':
+        
+            if st.button('Gerar OP'):
+                create_op(df, n_op)    
+                st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
 
 def page2():
     
