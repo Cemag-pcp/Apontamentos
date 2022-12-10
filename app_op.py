@@ -8,6 +8,8 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 import time
 from PIL import Image
 from datetime import date
+import datetime
+
 
 # Connect to Google Sheets
 
@@ -247,23 +249,73 @@ def page2():
     if n_op != '':
         finalizar_op(n_op) 
         
-def page3():
-    
-    st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Apontar OP - Plasma</h2>", unsafe_allow_html=True)
-
-    n_op = st.text_input("Digite a op")    
-
-
-
-
-
-
-
+# =============================================================================
+# def page3():
+#     
+#     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Apontar OP - Plasma</h2>", unsafe_allow_html=True)
+#     
+#     def apontar_op(n_op, data):
+#         
+#         name_sheet = 'Banco de dados OP'
+#         worksheet = 'Finalizadas'
+#         
+#         sh = sa.open(name_sheet)
+#         wks = sh.worksheet(worksheet)
+#     
+#         list1 = wks.get_all_records()
+#         table = pd.DataFrame(list1)
+#         table = table.drop_duplicates()
+#         
+#         table.Op = table.Op.astype(str) 
+#         
+#         if n_op != '':
+#             
+#             table = table.loc[(table['Op'] == n_op)]
+#             
+#         if data != '':
+#             
+#             table = table.loc[(table.data_finalizacao == data)]
+#         
+#         if data != '' and n_op != '':
+#             
+#             table = table.loc[(table.Op == n_op) & (table.data_finalizacao == data)]
+# 
+#         st.dataframe(table)  
+#     
+#     #n_op = '15474'
+# 
+#     check_box = st.checkbox("Sem data", key="disabled")
+# 
+#     if "visibility" not in st.session_state:
+#         st.session_state.visibility = "visible"
+#         st.session_state.disabled = False
+#     
+#     col1, col2 = st.columns(2)
+# 
+#     with col1:
+#         n_op = st.text_input("Número da op: ")
+#     
+#     
+#     if check_box:
+#         data = ''
+#         
+#     with col2:
+#         data = st.date_input("Data da finalização:",
+#                              label_visibility=st.session_state.visibility,
+#                              disabled=st.session_state.disabled,)
+#     
+#     if check_box:
+#         data=''
+#     else:
+#         data = data.strftime("%d/%m/%Y")    
+#         
+#     if st.button('Procurar'):
+#         apontar_op(n_op, data)
+# =============================================================================
 
 page_names_to_funcs = {
     "Criar OP": page1,
     "Finalizar OP": page2,
-    "Apontar OP": page3,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
