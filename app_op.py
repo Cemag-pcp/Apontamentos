@@ -140,6 +140,8 @@ def page1():
             df['tamanho da chapa'] = tamanho_chapa_list[0][0]
             df['qt. chapas'] = qt_chapa_list[0][0]
             df['op'] = n_op
+            df['data criada'] = date.today().strftime('%d/%m/%Y')
+
             
             # reordenar colunas
             
