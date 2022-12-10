@@ -235,8 +235,8 @@ def page2():
                     
             # Guardar no banco de dados
         
-            name_sheet = 'Banco de dados mestre - OP finalizada'
-            worksheet = 'Banco de op'
+            name_sheet = 'Banco de dados OP'
+            worksheet = 'Finalizadas'
             
             sh = sa.open(name_sheet)
             
