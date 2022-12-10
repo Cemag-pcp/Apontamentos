@@ -176,7 +176,7 @@ def page1():
 
 def page2():
          
-        st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Finalizar OP - Plasma</h2>", unsafe_allow_html=True)
+         st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Finalizar OP - Plasma</h2>", unsafe_allow_html=True)
 
     def finalizar_op(n_op):    
         
