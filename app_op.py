@@ -124,8 +124,7 @@ def page1():
             planilha.update('A1', 'Ordem de Produção - PLASMA')
             planilha.format('A1', {'textFormat': {'bold': True, "fontSize": 25},
                                    "horizontalAlignment":"CENTER", "verticalAlignment":"MIDDLE"})
-         
-
+        
     # =============================================================================
     #         url = 'https://drive.google.com/file/d/18o3wyOzID9Z-xooQ0KuNsONay-WzKgKo'
     #         
@@ -150,8 +149,8 @@ def page1():
             
             # Guardar no banco de dados
             
-            name_sheet = 'Banco de dados mestre - OP criadas'
-            worksheet = 'Banco de op'
+            name_sheet = 'Banco de dados OP'
+            worksheet = 'Criadas'
             
             sh = sa.open(name_sheet)
             df_list = df.values.tolist()
@@ -178,8 +177,8 @@ def page2():
     
     def finalizar_op(n_op):    
         
-        name_sheet = 'Banco de dados mestre - OP criadas'
-        worksheet = 'Banco de op'
+        name_sheet = 'Banco de dados OP'
+        worksheet = 'Finalizadas'
         
         sh = sa.open(name_sheet)
         wks = sh.worksheet(worksheet)
