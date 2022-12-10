@@ -168,8 +168,7 @@ def page1():
     
     if st.button('Gerar OP'):
         create_op(df, n_op)
-    
-    st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
 
     
 
