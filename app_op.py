@@ -36,13 +36,13 @@ with st.sidebar:
 
 def page1():
     
-    def create_op(df, n_op):
+    def create_op_plasma(df, n_op):
         
             # ======================================= #
         
             # Op extraída do pronest
 
-            #df = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP15501.xls")
+            #df = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP15509.xls")
 
             df = df.dropna(how='all')
             
@@ -62,43 +62,22 @@ def page1():
             df = df[[nome_coluna_1,'Unnamed: 19', 'Unnamed: 27', 'Unnamed: 32', 'Unnamed: 35']]
             
             df = df[2:]
-            
-            # ======================================= #
-            
-            # criando planilha google sheet
-            
-            planilha = client.create("OP" + n_op)
-            planilha.share('pcp@cemag.com.br', perm_type='user', role='writer')
-            
-            # Abra a planilha
-            
-            #n_op = '15500'
-            
-            planilha = client.open("OP" + n_op).sheet1
-                    
+        
             # quantidade de chapa
             
-            planilha.update('B2', 'Qt. chapas')
             qt_chapa_list = qt_chapa.values.tolist()
-            planilha.update('B3', qt_chapa_list[0][0])
             
             # tamanho da chapa
             
-            planilha.update('C2', 'Ocupação da chapa')
             tamanho_chapa_list = tamanho_chapa.values.tolist()
-            planilha.update('C3', tamanho_chapa_list[0][0])
             
             # aproveitamento
             
-            planilha.update('D2', 'Aproveitamento')
             aproveitamento_list = aproveitamento_df.values.tolist()
-            planilha.update('D3', aproveitamento_list[0])
             
             # espessura
             
-            planilha.update('E2', 'Espessura')
             espessura_list = espessura_df.values.tolist()
-            planilha.update('E3', espessura_list[0][0])
             
             # cabeçalho da tabela
             
@@ -106,27 +85,11 @@ def page1():
                                       'Tamanho chapa':['Tamanho chapa'],
                                       'Peso':['Peso'], 'Tempo':['Tempo']})
             cabecalho_list = cabecalho_df.values.tolist()
-            planilha.update('A5', cabecalho_list)
             
-            # colunas com nome, quantidade, tempo, peso, tamanho da peça
             
             lista = df.values.tolist()
-            planilha.update('A6', lista)
-            
-            # Formatando células e tamanho de colunas
-            
-            planilha.format('A5:E5', {'textFormat': {'bold': True}, "horizontalAlignment":"CENTER"})
-            planilha.format('B2:E2', {'textFormat': {'bold': True}, "horizontalAlignment":"CENTER"})
-            planilha.format('A6:E', {"horizontalAlignment":"LEFT"})
-            
-            set_column_width(planilha, 'A', 500)
-            set_column_width(planilha, 'C', 200)
-            
-            planilha.merge_cells('A1:A4')
-            planilha.update('A1', 'Ordem de Produção - PLASMA')
-            planilha.format('A1', {'textFormat': {'bold': True, "fontSize": 25},
-                                   "horizontalAlignment":"CENTER", "verticalAlignment":"MIDDLE"})
-         
+          
+
             # Criando colunas na tabela para guardar no bando de dados
             
             df['espessura'] = espessura_list[0][0]
@@ -134,13 +97,15 @@ def page1():
             df['tamanho da chapa'] = tamanho_chapa_list[0][0]
             df['qt. chapas'] = qt_chapa_list[0][0]
             df['op'] = n_op
-            df['data criada'] = date.today().strftime('%d/%m/%Y')
             
             # reordenar colunas
             
             cols = df.columns.tolist()
             cols = cols[-1:] + cols[:-1]
             df = df[cols]
+            
+            df['data criada'] = date.today().strftime('%d/%m/%Y')
+            df['Máquina'] = 'Plasma'
             
             # Guardar no banco de dados
             
@@ -159,19 +124,19 @@ def page1():
         df = pd.read_excel(uploaded_file)
         name_file = uploaded_file.name
         name_file = name_file[2:7]
-        n_op = name_file            
+        n_op = str(name_file)
     
         if n_op != '':
         
             if st.button('Gerar OP'):
-                create_op(df, n_op)    
+                create_op_plasma(df, n_op)    
                 st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
 
 def page2():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Finalizar OP - Plasma</h2>", unsafe_allow_html=True)
-    
-    def finalizar_op(n_op):    
+
+    def finalizar_op(n_op, maq):    
         
         name_sheet = 'Banco de dados OP'
         worksheet = 'Criadas'
@@ -182,9 +147,17 @@ def page2():
         list1 = wks.get_all_records()
         table = pd.DataFrame(list1)
         table = table.drop_duplicates()
-            
-        table = table.query('op ==' + n_op)
         
+# =============================================================================
+#         
+#         n_op = 1206
+#         maq = 'Laser'
+#         
+# =============================================================================
+
+        table = table.loc[(table.op == n_op) & (table.maquina == maq)]
+        table = table.reset_index(drop=True)
+    
         caract_op = table[['Aproveitamento','Tamanho da chapa','qt. chapa','Espessura']][0:1]
         
         caract_op = caract_op.reset_index(drop=True)
@@ -222,12 +195,13 @@ def page2():
             df2['Espessura'] = new_carac['Espessura'][0]
             df2['op'] = n_op
             df2['data finalização'] = date.today().strftime('%d/%m/%Y')
-    
+            df2['maquina'] = maq
+            
         # reordenando colunas
             
         
             df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
-                       'qt. chapa','Aproveitamento', 'Espessura', 'data finalização']]    
+                       'qt. chapa','Aproveitamento', 'Espessura', 'data finalização', 'maquina']]    
                     
             # Guardar no banco de dados
         
@@ -244,78 +218,104 @@ def page2():
     
     # Número da OP
 
-    n_op = st.text_input("Número da op:")
+    maquina = st.radio(
+    "Máquina",
+    ('Plasma', 'Laser'),)
+    
+    if maquina == 'Plasma':
+        maq = 'Plasma'
+    else:
+        maq = 'Laser'
+
+    n_op = int(st.text_input("Número da op:"))
         
     #if st.button('Consultar'):
     if n_op != '':
-        finalizar_op(n_op) 
+        finalizar_op(n_op, maq) 
+  
+def page3():
+    
+    def create_op_laser(df, n_op, df1):
         
-# =============================================================================
-# def page3():
-#     
-#     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Apontar OP - Plasma</h2>", unsafe_allow_html=True)
-#     
-#     def apontar_op(n_op, data):
-#         
-#         name_sheet = 'Banco de dados OP'
-#         worksheet = 'Finalizadas'
-#         
-#         sh = sa.open(name_sheet)
-#         wks = sh.worksheet(worksheet)
-#     
-#         list1 = wks.get_all_records()
-#         table = pd.DataFrame(list1)
-#         table = table.drop_duplicates()
-#         
-#         table.Op = table.Op.astype(str) 
-#         
-#         if n_op != '':
-#             
-#             table = table.loc[(table['Op'] == n_op)]
-#             
-#         if data != '':
-#             
-#             table = table.loc[(table.data_finalizacao == data)]
-#         
-#         if data != '' and n_op != '':
-#             
-#             table = table.loc[(table.Op == n_op) & (table.data_finalizacao == data)]
-# 
-#         st.dataframe(table)  
-#     
-#     #n_op = '15474'
-# 
-#     check_box = st.checkbox("Sem data", key="disabled")
-# 
-#     if "visibility" not in st.session_state:
-#         st.session_state.visibility = "visible"
-#         st.session_state.disabled = False
-#     
-#     col1, col2 = st.columns(2)
-# 
-#     with col1:
-#         n_op = st.text_input("Número da op: ")
-#     
-#     
-#     if check_box:
-#         data = ''
-#         
-#     with col2:
-#         data = st.date_input("Data da finalização:",
-#                              label_visibility=st.session_state.visibility,
-#                              disabled=st.session_state.disabled,)
-#     
-#     if check_box:
-#         data=''
-#     else:
-#         data = data.strftime("%d/%m/%Y")    
-#         
-#     if st.button('Procurar'):
-#         apontar_op(n_op, data)
-# =============================================================================
+            # ======================================= #
+        
+            # Op extraída do pronest
+    
+            #df = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP1206 L1.xlsx")
+            #df1 = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP1206 L1.xlsx",sheet_name='Nestings_Cost')
+        
+            df = df.dropna(how='all')            
+            df1 = df1.dropna(how='all')            
+
+            qt_chapas = df1[df1.columns[2:3]][3:4]
+            qt_chapas_list = qt_chapas.values.tolist()[0][0]
+
+            aprov1 = df1[df1.columns[2:3]][7:8] 
+            aprov2 = df1[df1.columns[2:3]][9:10] 
+            aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) )
+            
+            df = df[['Unnamed: 1','Unnamed: 4']]
+            df = df.rename(columns={'Unnamed: 1':'Descrição',
+                                    'Unnamed: 4': 'Quantidade'})
+            df = df.dropna(how='all')
+            
+            df = df[10:len(df)-1]
+            
+            df = df.reset_index(drop=True)
+            
+            df['op'] = n_op
+            
+            cols = df.columns.tolist()
+            cols = cols[-1:] + cols[:-1]
+            df = df[cols]
+            
+            df['tamanho da peça'] = ''
+            df['peso'] = ''
+            df['tempo'] = ''
+            df['espessura'] = espessura
+            df['Aproveitamento'] = aprov_list
+            df['Tamanho da chapa'] = tamanho_chapa
+            df['qt. chapas'] = qt_chapas_list
+            df['data criada'] = date.today().strftime('%d/%m/%Y')
+            df['Máquina'] = 'Laser'
+                        
+            # ======================================= #
+                        
+            # Guardar no banco de dados
+            
+            name_sheet = 'Banco de dados OP'
+            worksheet = 'Criadas'
+            
+            sh = sa.open(name_sheet)
+            df_list = df.values.tolist()
+            sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
+    
+    st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser</h2>", unsafe_allow_html=True)
+    
+    comp = st.text_input("Comprimento:")
+    larg = st.text_input("Largura:")
+    espessura = st.text_input("Espessura:")
+    
+    tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
+    
+    uploaded_file = st.file_uploader("Choose a XLS file", type="xlsx")
+    
+    if uploaded_file:
+        df = pd.read_excel(uploaded_file)
+        df1 = pd.read_excel(uploaded_file, sheet_name='Nestings_Cost')
+        name_file = uploaded_file.name
+        name_file = name_file[2:7]
+        n_op = name_file
+    
+        if n_op != '':
+        
+            if st.button('Gerar OP'):
+                create_op_laser(df, n_op, df1)    
+                st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
 
 page_names_to_funcs = {
-    "Criar OP": page1,
+    "Criar OP - Plasma": page1,
+    "Criar OP - Laser": page3,
     "Finalizar OP": page2,
 }
 
