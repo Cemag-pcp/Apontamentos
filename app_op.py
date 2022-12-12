@@ -217,19 +217,23 @@ def page2():
             st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP FINALIZADA!!</h2>", unsafe_allow_html=True) 
     
     # Número da OP
+    
+    n_op = 0
 
     maquina = st.radio(
     "Máquina",
-    ('Plasma', 'Laser'),)
-    
-    if maquina == 'Plasma':
-        maq = 'Plasma'
-    else:
-        maq = 'Laser'
+    ('Plasma', 'Laser'))
 
-    n_op = int(st.text_input("Número da op:"))
+    try:
+        if maquina == 'Plasma':
+            maq = 'Plasma'
+        else:
+            maq = 'Laser'
         
-    #if st.button('Consultar'):
+        n_op = int(st.text_input("Número da op:"))
+    except:
+        pass
+    
     if n_op != '':
         finalizar_op(n_op, maq) 
   
