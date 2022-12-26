@@ -10,7 +10,6 @@ from PIL import Image
 from datetime import date
 import datetime
 
-
 # Connect to Google Sheets
 
 scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -46,7 +45,7 @@ def page1():
 
             df = df.dropna(how='all')
             
-            tamanho_chapa = df[df.columns[16:17]][9:10]
+            tamanho_chapa = df[df.columns[16:17]][9:10].replace('×', 'x')
             qt_chapa = df[df.columns[2:3]][9:10]
             
             nome_coluna_1 = df[df.columns[0]].name
@@ -130,7 +129,7 @@ def page1():
         
             if st.button('Gerar OP'):
                 create_op_plasma(df, n_op)    
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
+                st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
 
 def page2():
     
@@ -148,13 +147,6 @@ def page2():
         table = pd.DataFrame(list1)
         table = table.drop_duplicates()
         
-# =============================================================================
-#         
-#         n_op = 1206
-#         maq = 'Laser'
-#         
-# =============================================================================
-
         table = table.loc[(table.op == n_op) & (table.maquina == maq)]
         table = table.reset_index(drop=True)
     
@@ -196,9 +188,8 @@ def page2():
             df2['op'] = n_op
             df2['data finalização'] = date.today().strftime('%d/%m/%Y')
             df2['maquina'] = maq
-            
-        # reordenando colunas
-            
+                       
+            # reordenando colunas
         
             df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
                        'qt. chapa','Aproveitamento', 'Espessura', 'data finalização', 'maquina']]    
@@ -214,7 +205,7 @@ def page2():
             
             sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
             
-            st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP FINALIZADA!!</h2>", unsafe_allow_html=True) 
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP FINALIZADA!!</h2>", unsafe_allow_html=True) 
     
     # Número da OP
     
@@ -296,14 +287,24 @@ def page3():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser</h2>", unsafe_allow_html=True)
     
+    name_sheet = 'Banco de dados OP'
+    worksheet = 'Chapas'
+    
+    sh = sa.open(name_sheet)
+    wks = sh.worksheet(worksheet)
+
+    list1 = wks.get_all_records()
+    table = pd.DataFrame(list1)
+
     comp = st.text_input("Comprimento:")
     larg = st.text_input("Largura:")
-    espessura = st.text_input("Espessura:")
+    #espessura = st.text_input("Espessura:")
+    espessura = st.selectbox('Espessura',(list(table['espessura1'])))
     
     tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
     
     uploaded_file = st.file_uploader("Choose a XLS file", type="xlsx")
-    
+
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
         df1 = pd.read_excel(uploaded_file, sheet_name='Nestings_Cost')
@@ -315,7 +316,10 @@ def page3():
         
             if st.button('Gerar OP'):
                 create_op_laser(df, n_op, df1)    
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: black'>OP aberta!</h2>", unsafe_allow_html=True)
+                st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
+
+def page4():
+    pass
 
 page_names_to_funcs = {
     "Criar OP - Plasma": page1,
