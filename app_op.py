@@ -147,11 +147,12 @@ def page2():
         table = pd.DataFrame(list1)
         table = table.drop_duplicates()
         
-        table = table.loc[(table.op == n_op) & (table.maquina == maq)]
+        table['op'] = table['op'].astype(str)
+
+        table = table.loc[(table.op == n_op)] # & (table.maquina == maq)]
         table = table.reset_index(drop=True)
-    
+
         caract_op = table[['Aproveitamento','Tamanho da chapa','qt. chapa','Espessura']][0:1]
-        
         caract_op = caract_op.reset_index(drop=True)
     
         gb = GridOptionsBuilder.from_dataframe(caract_op)
@@ -221,7 +222,7 @@ def page2():
         else:
             maq = 'Laser'
         
-        n_op = int(st.text_input("Número da op:"))
+        n_op = st.text_input("Número da op:")
     except:
         pass
     
@@ -352,8 +353,10 @@ def page4():
             table = pd.DataFrame(list1)
             table = table.drop_duplicates()
             
+            table['op'] = table['op'].astype(str)
+
             table = table.set_index('Peças').filter(like=peca, axis=0)
-            table = table.set_index('maquina').filter(like=maq, axis=0)
+            #table = table.set_index('maquina').filter(like=maq, axis=0)
 
             table = table.reset_index(drop=True)
 
@@ -378,6 +381,11 @@ def page4():
         table = pd.DataFrame(list1)
         table = table.drop_duplicates()
         
+        table['op'] = table['op'].astype(str)
+
+        table = table.set_index('op').filter(like=n_op, axis=0)
+        table = table.reset_index()
+
         table1 = table[['Tamanho da chapa','Espessura','qt. chapa']][:1]
 
         gb = GridOptionsBuilder.from_dataframe(table1)
@@ -395,8 +403,6 @@ def page4():
 
         try:
             table2 = table2.set_index('op').filter(like=n_op, axis=0)
-            table2 = table2.reset_index()
-            table2 = table2.set_index('maquina').filter(like=maq, axis=0)
             table2 = table2.reset_index()
             table2 = table2[['op','Peças', 'Quantidade']]
             st.dataframe(table2)
@@ -438,8 +444,6 @@ def page4():
             sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
             
             st.title('Número da nova op: ' + str(ult_op))
-
-
     
 
 page_names_to_funcs = {
