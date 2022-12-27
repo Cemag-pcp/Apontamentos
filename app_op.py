@@ -135,7 +135,7 @@ def page2():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Finalizar OP</h2>", unsafe_allow_html=True)
 
-    def finalizar_op(n_op, maq):    
+    def finalizar_op(n_op):    
         
         name_sheet = 'Banco de dados OP'
         worksheet = 'Criadas'
@@ -182,18 +182,21 @@ def page2():
         
         if st.button('salvar'):
             
+            new_carac['qt. chapa'] = new_carac['qt. chapa'].astype(int)
+            df2['Quantidade'] = df2['Quantidade'].astype(int)
+            
             df2['Aproveitamento'] = new_carac['Aproveitamento'][0]
             df2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
             df2['qt. chapa'] = new_carac['qt. chapa'][0]
             df2['Espessura'] = new_carac['Espessura'][0]
             df2['op'] = n_op
             df2['data finalização'] = date.today().strftime('%d/%m/%Y')
-            df2['maquina'] = maq
-                       
+            df2['Quantidade'] = df2['Quantidade'] * new_carac['qt. chapa'][0]
+
             # reordenando colunas
         
             df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
-                       'qt. chapa','Aproveitamento', 'Espessura', 'data finalização', 'maquina']]    
+                       'qt. chapa','Aproveitamento', 'Espessura', 'data finalização']]    
                     
             # Guardar no banco de dados
         
@@ -212,22 +215,13 @@ def page2():
     
     n_op = 0
 
-    maquina = st.radio(
-    "Máquina",
-    ('Plasma', 'Laser'))
-
-    try:
-        if maquina == 'Plasma':
-            maq = 'Plasma'
-        else:
-            maq = 'Laser'
-        
+    try:        
         n_op = st.text_input("Número da op:")
     except:
         pass
     
     if n_op != '':
-        finalizar_op(n_op, maq) 
+        finalizar_op(n_op) 
   
 def page3():
     
