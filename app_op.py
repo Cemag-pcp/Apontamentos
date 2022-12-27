@@ -319,12 +319,134 @@ def page3():
                 st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
 
 def page4():
-    pass
+    
+    st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Duplicador de OP</h2>", unsafe_allow_html=True)
+
+    with st.form("my_form"):
+
+        peca = st.text_input("Peça:")
+
+        submitted = st.form_submit_button("Submit")
+
+        maquina = st.radio(
+        "Máquina",
+        ('Plasma', 'Laser'))
+
+        try:
+            if maquina == 'Plasma':
+                maq = 'Plasma'
+            else:
+                maq = 'Laser'
+        except:
+            pass
+
+        if submitted:
+
+            name_sheet = 'Banco de dados OP'
+            worksheet = 'Criadas'
+            
+            sh = sa.open(name_sheet)
+            wks = sh.worksheet(worksheet)
+
+            list1 = wks.get_all_records()
+            table = pd.DataFrame(list1)
+            table = table.drop_duplicates()
+            
+            table = table.set_index('Peças').filter(like=peca, axis=0)
+            table = table.set_index('maquina').filter(like=maq, axis=0)
+
+            table = table.reset_index(drop=True)
+
+            caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']][0:1]
+            
+            caract_op = caract_op.reset_index(drop=True)
+
+            st.dataframe(caract_op)
+
+    n_op = st.text_input("Op:")
+    submitted = st.button("Abrir op")        
+
+    if n_op != '':
+
+        name_sheet = 'Banco de dados OP'
+        worksheet = 'Criadas'
+        
+        sh = sa.open(name_sheet)
+        wks = sh.worksheet(worksheet)
+
+        list1 = wks.get_all_records()
+        table = pd.DataFrame(list1)
+        table = table.drop_duplicates()
+        
+        table1 = table[['Tamanho da chapa','Espessura','qt. chapa']][:1]
+
+        gb = GridOptionsBuilder.from_dataframe(table1)
+        gb.configure_column('Tamanho da chapa', editable=True)
+        gb.configure_column('Espessura', editable=True)
+        gb.configure_column('qt. chapa', editable=True)
+        grid_options = gb.build()
+        grid_response = AgGrid(table1, gridOptions=grid_options, data_return_mode='AS_INPUT', update_model='MODEL_CHANGE\D')
+
+        new_carac = grid_response['data']
+
+        qt_chapa = new_carac['qt. chapa'][0]
+
+        table2 = table.copy()
+
+        try:
+            table2 = table2.set_index('op').filter(like=n_op, axis=0)
+            table2 = table2.reset_index()
+            table2 = table2.set_index('maquina').filter(like=maq, axis=0)
+            table2 = table2.reset_index()
+            table2 = table2[['op','Peças', 'Quantidade']]
+            st.dataframe(table2)
+        except:
+            st.text("Op não encontrada")
+
+        if st.button("Duplicar"):
+
+            name_sheet = 'Banco de dados OP'
+            worksheet = 'ultima_OP'
+            
+            sh = sa.open(name_sheet)
+            wks = sh.worksheet(worksheet)
+
+            list1 = wks.get_all_records()
+            table = pd.DataFrame(list1)
+
+            ult_op = table['ultima_op'].values.tolist()[0] + 1
+
+            wks.update('A2', ult_op)
+            
+            table2['op'] = ult_op
+            table2['Quantidade'] = table2['Quantidade']*qt_chapa
+            table2['Tamanho da peça'] = ''
+            table2['Peso'] = ''
+            table2['Tempo'] = ''
+            table2['Espessura'] = new_carac['Espessura'][0]
+            table2['Aproveitamento'] = ''
+            table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
+            table2['qt. chapa'] = new_carac['qt. chapa'][0]
+            table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
+            
+            worksheet = 'Criadas'
+            
+            sh = sa.open(name_sheet)
+            
+            df_list = table2.values.tolist()
+            
+            sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
+            
+            st.title('Número da nova op: ' + str(ult_op))
+
+
+    
 
 page_names_to_funcs = {
     "Criar OP - Plasma": page1,
     "Criar OP - Laser": page3,
     "Finalizar OP": page2,
+    "Duplicador de OP": page4,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
