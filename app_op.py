@@ -360,11 +360,16 @@ def page4():
 
             table = table.reset_index(drop=True)
 
-            caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']][0:1]
+            caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']]
             
             caract_op = caract_op.reset_index(drop=True)
 
-            st.dataframe(caract_op)
+            gb = GridOptionsBuilder.from_dataframe(caract_op)
+            grid_options = gb.build()
+            grid_response = AgGrid(caract_op, gridOptions=grid_options, data_return_mode='AS_INPUT', update_model='MODEL_CHANGE\D')
+
+            new_carac = grid_response['data']
+            #st.dataframe(caract_op)
 
     n_op = st.text_input("Op:")
     submitted = st.button("Abrir op")        
@@ -393,7 +398,14 @@ def page4():
         gb.configure_column('Espessura', editable=True)
         gb.configure_column('qt. chapa', editable=True)
         grid_options = gb.build()
-        grid_response = AgGrid(table1, gridOptions=grid_options, data_return_mode='AS_INPUT', update_model='MODEL_CHANGE\D')
+        grid_response = AgGrid(table1, 
+                                gridOptions=grid_options,
+                                width='100%',
+                                height=80,
+                                update_mode='MANUAL',
+                                try_to_convert_back_to_original_types = False,
+                                fit_columns_on_grid_load = True,
+                                update_model='MODEL_CHANGE\D')
 
         new_carac = grid_response['data']
 
