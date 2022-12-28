@@ -85,16 +85,15 @@ def page1():
                                       'Peso':['Peso'], 'Tempo':['Tempo']})
             cabecalho_list = cabecalho_df.values.tolist()
             
-            
             lista = df.values.tolist()
           
-
             # Criando colunas na tabela para guardar no bando de dados
-            
+
+            df['Unnamed: 19'] = df['Unnamed: 19'].astype(int)
             df['espessura'] = espessura_list[0][0]
             df['aproveitamento'] = aproveitamento_list[0]
             df['tamanho da chapa'] = tamanho_chapa_list[0][0]
-            df['qt. chapas'] = qt_chapa_list[0][0]
+            df['qt. chapas'] = int(qt_chapa_list[0][0])
             df['op'] = n_op
             
             # reordenar colunas
@@ -112,6 +111,7 @@ def page1():
             worksheet = 'Criadas'
             
             sh = sa.open(name_sheet)
+            
             df_list = df.values.tolist()
             sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
 
@@ -154,7 +154,7 @@ def page2():
 
         caract_op = table[['Aproveitamento','Tamanho da chapa','qt. chapa','Espessura']][0:1]
         caract_op = caract_op.reset_index(drop=True)
-    
+
         gb = GridOptionsBuilder.from_dataframe(caract_op)
         gb.configure_column('Aproveitamento', editable=True)
         gb.configure_column('Tamanho da chapa', editable=True)
@@ -191,7 +191,7 @@ def page2():
             df2['Espessura'] = new_carac['Espessura'][0]
             df2['op'] = n_op
             df2['data finalização'] = date.today().strftime('%d/%m/%Y')
-            df2['Quantidade'] = df2['Quantidade'] * new_carac['qt. chapa'][0]
+            df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
 
             # reordenando colunas
         
@@ -254,7 +254,7 @@ def page3():
             df = df.reset_index(drop=True)
             
             df['op'] = n_op
-            
+        
             cols = df.columns.tolist()
             cols = cols[-1:] + cols[:-1]
             df = df[cols]
@@ -305,6 +305,7 @@ def page3():
         df1 = pd.read_excel(uploaded_file, sheet_name='Nestings_Cost')
         name_file = uploaded_file.name
         name_file = name_file[2:7]
+        name_file = name_file.replace(' ','')
         n_op = name_file
     
         if n_op != '':
@@ -317,56 +318,42 @@ def page4():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Duplicador de OP</h2>", unsafe_allow_html=True)
 
-    with st.form("my_form"):
+    peca = st.text_input("Peça:")
+    
+    if peca != '':
 
-        peca = st.text_input("Peça:")
+        name_sheet = 'Banco de dados OP'
+        worksheet = 'Criadas'
+        
+        sh = sa.open(name_sheet)
+        wks = sh.worksheet(worksheet)
 
-        submitted = st.form_submit_button("Submit")
+        list1 = wks.get_all_records()
+        table = pd.DataFrame(list1)
+        table = table.drop_duplicates()
+        
+        table['op'] = table['op'].astype(str)
 
-        maquina = st.radio(
-        "Máquina",
-        ('Plasma', 'Laser'))
+        table = table.set_index('Peças').filter(like=peca, axis=0)
 
-        try:
-            if maquina == 'Plasma':
-                maq = 'Plasma'
-            else:
-                maq = 'Laser'
-        except:
-            pass
+        table = table.reset_index(drop=True)
 
-        if submitted:
+        caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']]
 
-            name_sheet = 'Banco de dados OP'
-            worksheet = 'Criadas'
-            
-            sh = sa.open(name_sheet)
-            wks = sh.worksheet(worksheet)
+        caract_op = caract_op.reset_index(drop=True)
 
-            list1 = wks.get_all_records()
-            table = pd.DataFrame(list1)
-            table = table.drop_duplicates()
-            
-            table['op'] = table['op'].astype(str)
+        gb = GridOptionsBuilder.from_dataframe(caract_op)
+        grid_options = gb.build()
+        grid_response = AgGrid(caract_op, 
+                    gridOptions=grid_options,
+                    width='100%',
+                    height=400,
+                    fit_columns_on_grid_load = True,
+                    update_model='MODEL_CHANGE\D')
 
-            table = table.set_index('Peças').filter(like=peca, axis=0)
-            #table = table.set_index('maquina').filter(like=maq, axis=0)
-
-            table = table.reset_index(drop=True)
-
-            caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']]
-            
-            caract_op = caract_op.reset_index(drop=True)
-
-            gb = GridOptionsBuilder.from_dataframe(caract_op)
-            grid_options = gb.build()
-            grid_response = AgGrid(caract_op, gridOptions=grid_options, data_return_mode='AS_INPUT', update_model='MODEL_CHANGE\D')
-
-            new_carac = grid_response['data']
-            #st.dataframe(caract_op)
+        new_carac = grid_response['data']
 
     n_op = st.text_input("Op:")
-    submitted = st.button("Abrir op")        
 
     if n_op != '':
 
@@ -385,7 +372,10 @@ def page4():
         table = table.set_index('op').filter(like=n_op, axis=0)
         table = table.reset_index()
 
-        table1 = table[['Tamanho da chapa','Espessura','qt. chapa']][:1]
+        table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina']][:1]
+        
+        maq_antiga = table['maquina'][0]
+        qt_antiga = table['qt. chapa'][0]
 
         gb = GridOptionsBuilder.from_dataframe(table1)
         gb.configure_column('Tamanho da chapa', editable=True)
@@ -395,9 +385,7 @@ def page4():
         grid_response = AgGrid(table1, 
                                 gridOptions=grid_options,
                                 width='100%',
-                                height=80,
-                                update_mode='MANUAL',
-                                try_to_convert_back_to_original_types = False,
+                                height=400,
                                 fit_columns_on_grid_load = True,
                                 update_model='MODEL_CHANGE\D')
 
@@ -430,8 +418,10 @@ def page4():
 
             wks.update('A2', ult_op)
             
+            table2['Quantidade'] = table2['Quantidade'].astype(int)
+            
             table2['op'] = ult_op
-            table2['Quantidade'] = table2['Quantidade']*qt_chapa
+            table2['Quantidade'] = (table2['Quantidade'] / int(qt_antiga)) * int(qt_chapa)
             table2['Tamanho da peça'] = ''
             table2['Peso'] = ''
             table2['Tempo'] = ''
@@ -440,6 +430,8 @@ def page4():
             table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
             table2['qt. chapa'] = new_carac['qt. chapa'][0]
             table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
+            table2['maquina'] = maq_antiga
+            table2['op_espelho'] = n_op
             
             worksheet = 'Criadas'
             
@@ -451,7 +443,6 @@ def page4():
             
             st.title('Número da nova op: ' + str(ult_op))
     
-
 page_names_to_funcs = {
     "Criar OP - Plasma": page1,
     "Criar OP - Laser": page3,
