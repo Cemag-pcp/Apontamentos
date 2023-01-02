@@ -168,11 +168,12 @@ def page2():
         #st.dataframe(caract_op)
         
         table = table[['Peças', 'Quantidade']]
+        table['Mortas'] = ''
         
         #st.dataframe(table)
         
         gb = GridOptionsBuilder.from_dataframe(table)
-        gb.configure_column('Quantidade', editable=True)
+        gb.configure_column('Mortas', editable=True)
         grid_options = gb.build()
         grid_response = AgGrid(table, gridOptions=grid_options, data_return_mode='AS_INPUT', update_model='MODEL_CHANGE\D')
         
@@ -184,7 +185,7 @@ def page2():
             
             new_carac['qt. chapa'] = new_carac['qt. chapa'].astype(int)
             df2['Quantidade'] = df2['Quantidade'].astype(int)
-            
+
             df2['Aproveitamento'] = new_carac['Aproveitamento'][0]
             df2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
             df2['qt. chapa'] = new_carac['qt. chapa'][0]
@@ -196,7 +197,7 @@ def page2():
             # reordenando colunas
         
             df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
-                       'qt. chapa','Aproveitamento', 'Espessura', 'data finalização']]    
+                       'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'data finalização']]    
                     
             # Guardar no banco de dados
         
