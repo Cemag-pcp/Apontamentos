@@ -191,6 +191,9 @@ def page2():
             df2['data finalização'] = date.today().strftime('%d/%m/%Y')
             df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
 
+            df2 = df2.loc[(df2.Quantidade > 0)]
+            df2 = df2.reset_index(drop=True)         
+
             # reordenando colunas
         
             df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
