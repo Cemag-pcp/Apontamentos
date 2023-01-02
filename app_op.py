@@ -145,7 +145,7 @@ def page2():
     
         list1 = wks.get_all_records()
         table = pd.DataFrame(list1)
-        table = table.drop_duplicates()
+        #table = table.drop_duplicates()
         
         table['op'] = table['op'].astype(str)
 
@@ -242,7 +242,7 @@ def page3():
             qt_chapas_list = qt_chapas.values.tolist()[0][0]
 
             aprov1 = df1[df1.columns[2:3]][7:8] 
-            aprov2 = df1[df1.columns[2:3]][6:7]
+            aprov2 = df1[df1.columns[2:3]][9:10]
             aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) )
             
             df = df[['Unnamed: 1','Unnamed: 4']]
@@ -263,8 +263,10 @@ def page3():
             df['tamanho da peça'] = ''
             df['peso'] = ''
             df['tempo'] = ''
+            #espessura = '14'
             df['espessura'] = espessura
             df['Aproveitamento'] = aprov_list
+            #tamanho_chapa = '2800,00 x 1500,00 mm'
             df['Tamanho da chapa'] = tamanho_chapa
             df['qt. chapas'] = qt_chapas_list
             df['data criada'] = date.today().strftime('%d/%m/%Y')
@@ -283,7 +285,7 @@ def page3():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser</h2>", unsafe_allow_html=True)
     
-    name_sheet = 'Banco de dados OP'
+    name_sheet = 'Banco de dados OP'    
     worksheet = 'Chapas'
     
     sh = sa.open(name_sheet)
@@ -373,7 +375,7 @@ def page4():
         table = table.set_index('op').filter(like=n_op, axis=0)
         table = table.reset_index()
 
-        table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina']][:1]
+        table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
         
         maq_antiga = table['maquina'][0]
         qt_antiga = table['qt. chapa'][0]
@@ -393,6 +395,7 @@ def page4():
         new_carac = grid_response['data']
 
         qt_chapa = new_carac['qt. chapa'][0]
+        aproveitamento_espelho = new_carac['Aproveitamento'][0]
 
         table2 = table.copy()
 
@@ -427,7 +430,7 @@ def page4():
             table2['Peso'] = ''
             table2['Tempo'] = ''
             table2['Espessura'] = new_carac['Espessura'][0]
-            table2['Aproveitamento'] = ''
+            table2['Aproveitamento'] = aproveitamento_espelho
             table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
             table2['qt. chapa'] = new_carac['qt. chapa'].astype(int)[0]
             table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
