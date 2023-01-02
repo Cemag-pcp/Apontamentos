@@ -429,7 +429,7 @@ def page4():
             table2['Espessura'] = new_carac['Espessura'][0]
             table2['Aproveitamento'] = ''
             table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
-            table2['qt. chapa'] = new_carac['qt. chapa'][0]
+            table2['qt. chapa'] = new_carac['qt. chapa'].astype(int)[0]
             table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
             table2['maquina'] = maq_antiga
             table2['op_espelho'] = n_op
