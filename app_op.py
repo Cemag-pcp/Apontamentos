@@ -5,10 +5,8 @@ import streamlit as st
 from gspread_formatting import *
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
-import time
 from PIL import Image
 from datetime import date
-import datetime
 
 # Connect to Google Sheets
 
@@ -20,8 +18,6 @@ client = gspread.authorize(credentials)
 sa = gspread.service_account('service_account.json')
 
 # ======================================= #
-
-#streamlit
 
 # Título do app 
 
@@ -95,7 +91,8 @@ def page1():
             df['tamanho da chapa'] = tamanho_chapa_list[0][0]
             df['qt. chapas'] = int(qt_chapa_list[0][0])
             df['op'] = n_op
-            
+            df['opp'] = 'opp'
+
             # reordenar colunas
             
             cols = df.columns.tolist()
@@ -271,6 +268,7 @@ def page3():
             df['qt. chapas'] = qt_chapas_list
             df['data criada'] = date.today().strftime('%d/%m/%Y')
             df['Máquina'] = 'Laser'
+            df['opp'] = 'opp'
                         
             # ======================================= #
                         
@@ -338,6 +336,7 @@ def page4():
         table['op'] = table['op'].astype(str)
 
         table = table.set_index('Peças').filter(like=peca, axis=0)
+        table = table.set_index('opp').filter(like='opp', axis=0)
 
         table = table.reset_index(drop=True)
 
