@@ -232,8 +232,8 @@ def page3():
         
             # Op extraída do pronest
     
-            #df = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP1206 L1.xlsx")
-            #df1 = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP1206 L1.xlsx",sheet_name='Nestings_Cost')
+            df = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx")
+            df1 = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx",sheet_name='Nestings_Cost')
         
             df = df.dropna(how='all')            
             df1 = df1.dropna(how='all')            
@@ -242,8 +242,8 @@ def page3():
             qt_chapas_list = qt_chapas.values.tolist()[0][0]
 
             aprov1 = df1[df1.columns[2:3]][7:8] 
-            aprov2 = df1[df1.columns[2:3]][9:10] 
-            aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) )
+            aprov2 = df1[df1.columns[2:3]][5:6]
+            aprov_list = str(1 - ( float(aprov1.values.tolist()[0][0]) / float(aprov2.values.tolist()[0][0]) ) )
             
             df = df[['Unnamed: 1','Unnamed: 4']]
             df = df.rename(columns={'Unnamed: 1':'Descrição',
@@ -416,7 +416,7 @@ def page4():
             table = pd.DataFrame(list1)
 
             ult_op = table['ultima_op'].values.tolist()[0] + 1
-
+    
             wks.update('A2', ult_op)
             
             table2['Quantidade'] = table2['Quantidade'].astype(int)
