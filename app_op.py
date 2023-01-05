@@ -37,7 +37,7 @@ def page1():
         
             # Op extraída do pronest
 
-            #df = pd.read_excel(r"G:\Meu Drive\AJUSTES PCP\OP15509.xls")
+            #df = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Plasma\OP15611.xls")
 
             name_sheet = 'Banco de dados OP'
             worksheet = 'Criadas'
@@ -218,6 +218,7 @@ def page2():
                 df2['qt. chapa'] = new_carac['qt. chapa'][0]
                 df2['Espessura'] = new_carac['Espessura'][0]
                 df2['op'] = n_op
+                df2['op'] = df2['op'].astype(str)
                 df2['data finalização'] = date.today().strftime('%d/%m/%Y')
                 df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
 
@@ -475,6 +476,7 @@ def page4():
             table2['Quantidade'] = table2['Quantidade'].astype(int)
             
             table2['op'] = ult_op
+            table2['op'] = table2['op'].astype(str)
             table2['Quantidade'] = (table2['Quantidade'] / int(qt_antiga)) * int(qt_chapa)
             table2['Tamanho da peça'] = ''
             table2['Peso'] = ''
