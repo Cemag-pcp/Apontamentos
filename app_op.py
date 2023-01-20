@@ -342,8 +342,11 @@ def page3():
     sh = sa.open(name_sheet)
     wks = sh.worksheet(worksheet)
 
-    list1 = wks.get_all_records()
+    headers = wks.row_values(1)
+
+    list1 = wks.get()
     table = pd.DataFrame(list1)
+    table = table.set_axis(headers, axis=1, inplace=False)[1:]
 
     comp = st.text_input("Comprimento:", max_chars=4)
     larg = st.text_input("Largura:", max_chars=4)
