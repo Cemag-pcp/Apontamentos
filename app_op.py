@@ -220,7 +220,7 @@ def page2():
                 df2['Espessura'] = new_carac['Espessura'][0]
                 df2['op'] = n_op
                 df2['op'] = df2['op'].astype(str)
-                df2['data finalização'] = date.now().strftime('%d/%m/%Y %H:%M:%S')
+                df2['data finalização'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
                 df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
 
                 df2 = df2.loc[(df2.Quantidade > 0)]
