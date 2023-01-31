@@ -376,11 +376,7 @@ def page4():
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Duplicador de OP</h2>", unsafe_allow_html=True)
 
     peca = st.text_input("Peça:")
-    peca2 = st.text_input("Peça 2:")
     
-    st.checkbox("Uma peça")
-    st.checkbox("Duas peças")
-
     if peca != '':
 
         name_sheet = 'Banco de dados OP'
