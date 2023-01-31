@@ -349,8 +349,8 @@ def page3():
     table = pd.DataFrame(list1)
     table = table.set_axis(headers, axis=1, inplace=False)[1:]
 
-    comp = st.text_input("Comprimento:", max_chars=4)
-    larg = st.text_input("Largura:", max_chars=4)
+    comp = str(st.number_input("Comprimento:", max_value=4050))
+    larg = str(st.number_input("Largura:", max_value=1550))
     #espessura = st.text_input("Espessura:")
     espessura = st.selectbox('Espessura',(list(table['espessura1'])))
     
