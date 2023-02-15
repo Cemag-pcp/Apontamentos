@@ -427,7 +427,7 @@ def page4():
         
         table['op'] = table['op'].astype(str)
 
-        table = table.set_index('op').filter(like=n_op, axis=0)
+        table = table.set_index('op').filter(n_op, axis=0)
         table = table.reset_index()
 
         table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
