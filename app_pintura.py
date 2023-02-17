@@ -43,7 +43,7 @@ def load_datas():
     table = table.drop_duplicates()
         
     name_sheet1 = 'Base ordens de produçao finalizada'
-    worksheet1 = 'geral'
+    worksheet1 = 'Pintura'
     sh1 = sa.open(name_sheet1)
     wks1 = sh1.worksheet(worksheet1)
     list2 = wks1.get_all_records()

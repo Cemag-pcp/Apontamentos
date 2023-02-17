@@ -43,7 +43,7 @@ def load_datas():
     table = table.drop_duplicates()
         
     name_sheet1 = 'Base ordens de produçao finalizada'
-    worksheet1 = 'geral'
+    worksheet1 = 'Montagem'
     sh1 = sa.open(name_sheet1)
     wks1 = sh1.worksheet(worksheet1)
     list2 = wks1.get_all_records()
@@ -51,31 +51,23 @@ def load_datas():
     
     return sh1, table1, table#, lista_unicos
 
-def consultar(n_op,table1,table):
+def consultar(celula, n_op,table1,table):
         
-    filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
+    filter_ = table.loc[(table['DATA DA CARGA'] == n_op) & (table['CELULA'] == celula)]
     
     filter_['QT. PRODUZIDA'] = 0
             
     filter_ = filter_.reset_index(drop=True)
 
-    if len(table1.loc[(table1['DATA DA CARGA'] == n_op)]) != 0:
+    if len(table1.loc[(table1['DATA DA CARGA'] == n_op) & (table1['SETOR'] == celula)]) != 0:
         
-        tab2 = table1.loc[(table1['DATA DA CARGA'] == n_op)]   
-        tab2 = tab2.rename(columns={'QT PLAN.':'QT_ITENS'})
+        tab2 = table1.loc[(table1['DATA DA CARGA'] == n_op) & (table1['SETOR'] == celula)]   
         
-        filter_ = filter_.rename(columns={'DESCRICAO':'PEÇA'})
         filter_['QT. PRODUZIDA'] = 0
-        filter_['TIPO'] = ''
-        filter_['COR'] = ''
-        filter_['UNICO'] = filter_['CODIGO'] + n_op
         
-        for i in range(len(filter_)):    
-            filter_['COR'][i] = filter_['CODIGO'][i][6:]
-            
-        filter_ = filter_[['UNICO','CODIGO', 'PEÇA', 'QT_ITENS', 'COR', 'QT. PRODUZIDA', 'DATA DA CARGA']]
+        filter_ = filter_[['UNICO','CODIGO', 'DESCRICAO', 'QT_ITENS', 'QT. PRODUZIDA', 'DATA DA CARGA']]
 
-        df3 = tab2[['CODIGO','CAMBÃO','TIPO']]        
+        df3 = tab2[['CODIGO']]        
         df3 = pd.merge(filter_,df3, on=['CODIGO'], how='left').drop_duplicates(keep = 'last', subset=['CODIGO'])
                 
         qt_total = tab2[['CODIGO','QT APONT.']].groupby(['CODIGO']).sum().reset_index()        
@@ -85,51 +77,54 @@ def consultar(n_op,table1,table):
         df3 = df3.replace(np.nan,0)
             
         table_geral = df3
-        table_geral['CAMBÃO'] = table_geral['CAMBÃO'].replace(0,'')
-        table_geral['TIPO'] = table_geral['TIPO'].replace(0,'')
-        table_geral = table_geral[['UNICO','CODIGO', 'PEÇA', 'QT_ITENS','COR','QT. PRODUZIDA','QT APONT.', 'CAMBÃO', 'TIPO']]
+        table_geral = table_geral[['UNICO', 'CODIGO', 'DESCRICAO', 'QT_ITENS','DATA DA CARGA', 'QT. PRODUZIDA', 'QT APONT.']]
         
     else:
         
-        filter_['COR'] = ''
-        
-        for i in range(len(filter_)):    
-            filter_['COR'][i] = filter_['CODIGO'][i][6:]
-        
-        filter_['UNICO'] = filter_['CODIGO'] + n_op
-        table_geral = filter_[['UNICO','CODIGO', 'DESCRICAO', 'QT_ITENS', 'COR', 'QT. PRODUZIDA']]
+        table_geral = filter_.copy()
         table_geral['QT APONT.'] = 0
-        table_geral['CAMBÃO'] = ''
-        table_geral['TIPO'] = ''
-
+        table_geral['QT. PRODUZIDA'] = 0 
+        table_geral = table_geral[['UNICO', 'CODIGO', 'DESCRICAO', 'QT_ITENS','DATA DA CARGA', 'QT. PRODUZIDA','QT APONT.']]
+  
+        
     return table_geral
 
 n_op = st.date_input("Data da carga")
 n_op = n_op.strftime("%d/%m/%Y")
 
-button1 = st.button('Procurar')
+celula = 'SELECIONE'
 
-if st.session_state.get('button') != True:
+celula = st.selectbox(
+'Escolha a célula',
+('SELECIONE', 'EIXO SIMPLES','EIXO COMPLETO','PLAT. TANQUE. CAÇAM.','IÇAMENTO','FUEIRO', 'LATERAL', 'CHASSI'))
 
-    st.session_state['button'] = button1
+#button1 = st.button('Procurar')
 
-if st.session_state['button'] == True:
+# if st.session_state.get('button') != True:
+
+#     st.session_state['button'] = button1
+
+# if st.session_state['button'] == True:
+if celula != 'SELECIONE':
 
     sh1, table1, table = load_datas()
-    table_geral = consultar(n_op,table1,table)
+    table_geral = consultar(celula, n_op,table1,table)
 
-    try:
-        table_geral = table_geral.rename(columns={'DESCRICAO': 'PEÇA'})
-    except:
-        pass
+    table_geral = table_geral[['CODIGO','DESCRICAO','QT_ITENS','QT. PRODUZIDA','QT APONT.']]
+    table_geral = table_geral.drop_duplicates(subset=['CODIGO'] , keep='last')
+    table_geral = table_geral.reset_index(drop=True)
+    table_geral['CODIGO'] = table_geral['CODIGO'].astype(str)
+
+    for i in range(len(table_geral)):
+        try:
+            if len(table_geral['CODIGO'][i]) == 5:
+                table_geral['CODIGO'][i] = '0' + table_geral['CODIGO'][i]
+        except:
+            pass
     
-    table_geral = table_geral[['CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','QT APONT.','CAMBÃO','TIPO']]
-
     gb = GridOptionsBuilder.from_dataframe(table_geral)
     gb.configure_default_column(min_column_width=110)
     gb.configure_column('QT. PRODUZIDA', editable=True)
-    gb.configure_column('TIPO', editable=True)
-    gb.configure_column('CAMBÃO', editable=True)
     #gb.configure_selection(selection_mode="multiple", use_checkbox=True)
     grid_options = gb.build()
 
@@ -148,25 +143,36 @@ if st.session_state['button'] == True:
 
     filter_new = grid_response['data']
 
+
     button2 = st.button('Salvar')
 
     if button2:
-        
+
         filter_new['DATA DA CARGA'] = n_op  
         filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
-        filter_new['UNICO'] = filter_new['CODIGO'] + n_op
         filter_new = filter_new.replace({'QT. PRODUZIDA':{'':0}})
+        #filter_new['QT APONT.'] = filter_new['QT APONT.'].astype(int)
+        #filter_new['QT APONT.'] = filter_new.loc[(filter_new['QT APONT.'] > 0)]
         filter_new = filter_new.drop(columns={'QT APONT.'})
         filter_new['QT. PRODUZIDA'] = filter_new['QT. PRODUZIDA'].astype(int)
-        filter_new['SETOR'] = 'Montagem'
+        filter_new = filter_new.loc[(filter_new['QT. PRODUZIDA']>0)]
+        filter_new['SETOR'] = celula
+        unico = n_op.replace("/","")
 
-        compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
-        compare
+        filter_new['CODIGO'] = filter_new['CODIGO'].astype(str) 
+        
+        for i in range(len(filter_new)):
+            try:
+                if len(filter_new['CODIGO'][i]) == 5:
+                    filter_new['CODIGO'][i] = '0' + filter_new['CODIGO'][i]
+            except:
+                pass
 
-        filter_new = filter_new[['UNICO','CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','CAMBÃO','TIPO', 'DATA DA CARGA', 'DATA FINALIZADA', 'SETOR']]
-        len(filter_new)
+        filter_new['UNICO'] = unico + filter_new['CODIGO']
+
+        filter_new = filter_new[['UNICO','CODIGO','DESCRICAO','QT_ITENS','QT. PRODUZIDA', 'DATA DA CARGA', 'DATA FINALIZADA', 'SETOR']]
 
         filter_new = filter_new.values.tolist()
-        sh1.values_append('geral', {'valueInputOption': 'RAW'}, {'values': filter_new})
+        sh1.values_append('Montagem', {'valueInputOption': 'RAW'}, {'values': filter_new})
 
-        st.session_state['button'] = False
+        celula = 'SELECIONE'
