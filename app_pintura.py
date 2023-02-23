@@ -160,8 +160,8 @@ if st.session_state['button'] == True:
         filter_new['QT. PRODUZIDA'] = filter_new['QT. PRODUZIDA'].astype(int)
         filter_new['SETOR'] = 'Pintura'
 
-        compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
-        compare
+        #compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
+        #compare
 
         filter_new = filter_new[['UNICO','CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','CAMBÃO','TIPO', 'DATA DA CARGA', 'DATA FINALIZADA', 'SETOR']]
         len(filter_new)
