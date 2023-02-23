@@ -159,6 +159,7 @@ if st.session_state['button'] == True:
         filter_new = filter_new.drop(columns={'QT APONT.'})
         filter_new['QT. PRODUZIDA'] = filter_new['QT. PRODUZIDA'].astype(int)
         filter_new['SETOR'] = 'Pintura'
+        filter_new = filter_new.loc[(filter_new['QT. PRODUZIDA']>0)]
 
         #compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
         #compare
@@ -167,6 +168,6 @@ if st.session_state['button'] == True:
         len(filter_new)
 
         filter_new = filter_new.values.tolist()
-        sh1.values_append('geral', {'valueInputOption': 'RAW'}, {'values': filter_new})
+        sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
 
         st.session_state['button'] = False
