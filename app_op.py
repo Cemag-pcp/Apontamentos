@@ -209,43 +209,64 @@ def page2():
             
             df2 = table
             
-            if st.button('salvar'):
-                
-                new_carac['qt. chapa'] = new_carac['qt. chapa'].astype(int)
-                df2['Quantidade'] = df2['Quantidade'].astype(int)
+            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermeson','Marcio','Alex'))
 
-                df2['Aproveitamento'] = new_carac['Aproveitamento'][0]
-                df2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
-                df2['qt. chapa'] = new_carac['qt. chapa'][0]
-                df2['Espessura'] = new_carac['Espessura'][0]
-                df2['op'] = n_op
-                df2['op'] = df2['op'].astype(str)
-                df2['data finalização'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-                df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
+            if operador != "Selecione":
 
-                df2 = df2.loc[(df2.Quantidade > 0)]
-                df2 = df2.reset_index(drop=True)         
+                if st.button('salvar'):
+                    
+                    new_carac['qt. chapa'] = new_carac['qt. chapa'].astype(int)
+                    df2['Quantidade'] = df2['Quantidade'].astype(int)
 
-                # reordenando colunas
-            
-                df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
-                        'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'data finalização']]    
-                        
-                # Guardar no banco de dados
-            
-                name_sheet = 'Banco de dados OP'
-                worksheet = 'Finalizadas'
+                    df2['Aproveitamento'] = new_carac['Aproveitamento'][0]
+                    df2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
+                    df2['qt. chapa'] = new_carac['qt. chapa'][0]
+                    df2['Espessura'] = new_carac['Espessura'][0]
+                    df2['op'] = n_op
+                    df2['op'] = df2['op'].astype(str)
+                    df2['data finalização'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                    df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
+                    df2['Operador'] = operador
+
+                    df2 = df2.loc[(df2.Quantidade > 0)]
+                    df2 = df2.reset_index(drop=True)         
+
+                    # reordenando colunas
                 
-                sh = sa.open(name_sheet)
+                    df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
+                            'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'data finalização']]    
+                            
+                    # Guardar no banco de dados
                 
-                df_list = df2.values.tolist()
-                
-                sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
-                
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP FINALIZADA!!</h2>", unsafe_allow_html=True) 
+                    name_sheet = 'Banco de dados OP'
+                    worksheet = 'Finalizadas'
+                    
+                    sh = sa.open(name_sheet)
+                    
+                    df_list = df2.values.tolist()
+                    
+                    sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
+
+                    name_sheet = 'Banco de dados OP'
+                    worksheet = 'Sequenciamento Plasma'
+                                
+                    sh = sa.open(name_sheet)
+                    wks = sh.worksheet(worksheet)
+
+                    headers = wks.row_values(5)
+
+                    list1 = wks.get()
+                    table = pd.DataFrame(list1)
+                    table = table.set_axis(headers, axis=1, inplace=False)[5:]
+
+                    linha_op_finalizada = table.loc[(table['Op'] == n_op)].index[0] + 1
+
+                    wks.update('I' + str(linha_op_finalizada), operador)
+
+                    st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP FINALIZADA!!</h2>", unsafe_allow_html=True) 
         else:
             st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já foi finalizada!!</h2>", unsafe_allow_html=True) 
-        
+            
 
     # Número da OP
     

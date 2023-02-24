@@ -125,6 +125,8 @@ if st.session_state['button'] == True:
     
     table_geral = table_geral[['CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','QT APONT.','CAMBÃO','TIPO']]
 
+    table_geral = table_geral.drop_duplicates(subset = ['CODIGO'], keep='last')
+
     gb = GridOptionsBuilder.from_dataframe(table_geral)
     gb.configure_default_column(min_column_width=110)
     gb.configure_column('QT. PRODUZIDA', editable=True)
@@ -159,13 +161,21 @@ if st.session_state['button'] == True:
         filter_new = filter_new.drop(columns={'QT APONT.'})
         filter_new['QT. PRODUZIDA'] = filter_new['QT. PRODUZIDA'].astype(int)
         filter_new['SETOR'] = 'Pintura'
-        filter_new = filter_new.loc[(filter_new['QT. PRODUZIDA']>0)]
+        #filter_new = filter_new.loc[(filter_new['QT. PRODUZIDA']>0) & (filter_new['TIPO'] != '') & (filter_new['CAMBÃO'] != 0)]
 
         #compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
         #compare
 
-        filter_new = filter_new[['UNICO','CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','CAMBÃO','TIPO', 'DATA DA CARGA', 'DATA FINALIZADA', 'SETOR']]
-        len(filter_new)
+        list_index = []
+
+        for i in range(len(filter_new)):
+            if filter_new['QT. PRODUZIDA'][i] == 0 and filter_new['TIPO'][i] == '' and filter_new['CAMBÃO'][i] == '':  
+                ind = filter_new['QT. PRODUZIDA'].index[i]
+                list_index.append(ind)
+        
+        filter_new = filter_new.drop(list_index, axis=0)
+
+        filter_new = filter_new[['UNICO','CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','CAMBÃO','TIPO','DATA DA CARGA','DATA FINALIZADA','SETOR']]
 
         filter_new = filter_new.values.tolist()
         sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
