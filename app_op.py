@@ -209,7 +209,7 @@ def page2():
             
             df2 = table
             
-            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermeson','Marcio','Alex'))
+            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermerson','Marcio','Alex'))
 
             if operador != "Selecione":
 
