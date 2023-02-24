@@ -247,21 +247,24 @@ def page2():
                     
                     sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
 
-                    name_sheet = 'Banco de dados OP'
-                    worksheet = 'Sequenciamento Plasma'
-                                
-                    sh = sa.open(name_sheet)
-                    wks = sh.worksheet(worksheet)
+                    try:
+                        name_sheet = 'Banco de dados OP'
+                        worksheet = 'Sequenciamento Plasma'
+                                    
+                        sh = sa.open(name_sheet)
+                        wks = sh.worksheet(worksheet)
 
-                    headers = wks.row_values(5)
+                        headers = wks.row_values(5)
 
-                    list1 = wks.get()
-                    table = pd.DataFrame(list1)
-                    table = table.set_axis(headers, axis=1, inplace=False)[5:]
+                        list1 = wks.get()
+                        table = pd.DataFrame(list1)
+                        table = table.set_axis(headers, axis=1, inplace=False)[5:]
 
-                    linha_op_finalizada = table.loc[(table['Op'] == n_op)].index[0] + 1
+                        linha_op_finalizada = table.loc[(table['Op'] == n_op)].index[0] + 1
 
-                    wks.update('I' + str(linha_op_finalizada), operador)
+                        wks.update('I' + str(linha_op_finalizada), operador)
+                    except:
+                        pass
 
                     st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP FINALIZADA!!</h2>", unsafe_allow_html=True) 
         else:
