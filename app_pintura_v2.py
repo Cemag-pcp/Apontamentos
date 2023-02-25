@@ -211,12 +211,14 @@ def page2():
 
             lista_flags = filter_new[['FLAG']].values.tolist()
             
+            table1 = table1.loc[(table1['STATUS'] == '')]
+
             for flags in range(len(lista_flags)):
 
                 mudanca_status = table1.loc[(table1['FLAG']) == lista_flags[flags][0]]
-                mudanca_status = mudanca_status.index[0]
-                
-                wks1.update("L" + str(mudanca_status+2), 'OK') 
+                mudanca_status = mudanca_status.index[0] 
+
+                wks1.update("L" + str(mudanca_status+2), 'OK')
 
 
     if n_op != '':
