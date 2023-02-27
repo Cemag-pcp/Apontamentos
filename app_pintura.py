@@ -17,7 +17,7 @@ import numpy as np
 # Connect to Google Sheets
 # ======================================= #
 
-st.markdown("<h1 style='text-align: center; font-size:60px; color: White'>Apontamento de produção</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; font-size:60px; color: White'>Apontamento de produção Pintura</h1>", unsafe_allow_html=True)
 
 #with st.sidebar:
 image = Image.open('logo-cemagL.png')
@@ -49,135 +49,185 @@ def load_datas():
     list2 = wks1.get_all_records()
     table1 = pd.DataFrame(list2)
     
-    return sh1, table1, table#, lista_unicos
+    return wks1, sh1,table, table1#, lista_unicos
 
-def consultar(n_op,table1,table):
-        
-    filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
+def page1():
     
-    filter_['QT. PRODUZIDA'] = 0
-            
-    filter_ = filter_.reset_index(drop=True)
+    wks1, sh1, table, table1 = load_datas()
 
-    if len(table1.loc[(table1['DATA DA CARGA'] == n_op)]) != 0:
-        
-        tab2 = table1.loc[(table1['DATA DA CARGA'] == n_op)]   
-        tab2 = tab2.rename(columns={'QT PLAN.':'QT_ITENS'})
-        
-        filter_ = filter_.rename(columns={'DESCRICAO':'PEÇA'})
-        filter_['QT. PRODUZIDA'] = 0
-        filter_['TIPO'] = ''
-        filter_['COR'] = ''
-        filter_['UNICO'] = filter_['CODIGO'] + n_op
-        
-        for i in range(len(filter_)):    
-            filter_['COR'][i] = filter_['CODIGO'][i][6:]
-            
-        filter_ = filter_[['UNICO','CODIGO', 'PEÇA', 'QT_ITENS', 'COR', 'QT. PRODUZIDA', 'DATA DA CARGA']]
+    n_op = st.date_input("Data da carga")
+    n_op = n_op.strftime("%d/%m/%Y")
 
-        df3 = tab2[['CODIGO','CAMBÃO','TIPO']]        
-        df3 = pd.merge(filter_,df3, on=['CODIGO'], how='left').drop_duplicates(keep = 'last', subset=['CODIGO'])
+    def consultar(n_op,table):
+            
+        filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
+        
+        filter_['PROD.'] = ''
                 
-        qt_total = tab2[['CODIGO','QT APONT.']].groupby(['CODIGO']).sum().reset_index()        
-        qt_total.drop(qt_total[qt_total['QT APONT.'] == 0].index, inplace=True)
-        
-        df3 = pd.merge(df3, qt_total, on=['CODIGO'], how='left')
-        df3 = df3.replace(np.nan,0)
+        filter_ = filter_.reset_index(drop=True)
             
-        table_geral = df3
-        table_geral['CAMBÃO'] = table_geral['CAMBÃO'].replace(0,'')
-        table_geral['TIPO'] = table_geral['TIPO'].replace(0,'')
-        table_geral = table_geral[['UNICO','CODIGO', 'PEÇA', 'QT_ITENS','COR','QT. PRODUZIDA','QT APONT.', 'CAMBÃO', 'TIPO']]
-        
-    else:
-        
         filter_['COR'] = ''
         
         for i in range(len(filter_)):    
             filter_['COR'][i] = filter_['CODIGO'][i][6:]
         
-        filter_['UNICO'] = filter_['CODIGO'] + n_op
-        table_geral = filter_[['UNICO','CODIGO', 'DESCRICAO', 'QT_ITENS', 'COR', 'QT. PRODUZIDA']]
-        table_geral['QT APONT.'] = 0
+        #filter_['UNICO'] = filter_['CODIGO'] + n_op
+        filter_ = filter_.rename(columns={'DESCRICAO':'DESC.', 'QT_ITENS':'PLAN.'})
+        table_geral = filter_[['UNICO','CODIGO', 'DESC.', 'PLAN.', 'COR', 'PROD.']]
         table_geral['CAMBÃO'] = ''
         table_geral['TIPO'] = ''
+        
+        table_geral = table_geral[['CODIGO','DESC.','PLAN.','COR','PROD.','CAMBÃO','TIPO']]
 
-    return table_geral
+        table_geral = table_geral.drop_duplicates(subset = ['CODIGO'], keep='last')
 
-n_op = st.date_input("Data da carga")
-n_op = n_op.strftime("%d/%m/%Y")
+        dropdown_tipo = ('PO','PU','')
 
-button1 = st.button('Procurar')
+        gb = GridOptionsBuilder.from_dataframe(table_geral)
+        gb.configure_default_column(min_column_width=10)
+        gb.configure_column('PROD.', editable=True,)
+        gb.configure_column('TIPO', editable=True, cellEditor='agSelectCellEditor', cellEditorParams={'values': dropdown_tipo})
+        gb.configure_column('CAMBÃO', editable=True)
+        #gb.configure_column('QT_ITENS', cellStyle={'color': 'white', 'font-size': '15px'}, suppressMenu=True, wrapHeaderText=True, autoHeaderHeight=True)
+        #gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        #custom_css = {".ag-header-cell-text": {"font-size": "15px", 'text-overflow': 'revert;', 'font-weight': 700},
+        #".ag-theme-streamlit": {'transform': "scale(0.8)", "transform-origin": '0 0'}}
+        grid_options = gb.build()
 
-if st.session_state.get('button') != True:
+        grid_response = AgGrid(table_geral,
+                                gridOptions=grid_options,
+                                data_return_mode='AS_INPUT',
+                                #custom_css=custom_css,
+                                width='100%',
+                                update_mode='VALUE_CHANGED',
+                                height=500,
+                                fit_columns_on_grid_load = True,
+                                enable_enterprise_modules=True,
+                                theme='streamlit',
+                                )    
 
-    st.session_state['button'] = button1
+        filter_new = grid_response['data']
 
-if st.session_state['button'] == True:
+        button2 = st.button('Salvar')
 
-    sh1, table1, table = load_datas()
-    table_geral = consultar(n_op,table1,table)
+        if button2:
+            
+            filter_new['DATA DA CARGA'] = n_op  
+            filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
+            filter_new['UNICO'] = ''
 
-    try:
-        table_geral = table_geral.rename(columns={'DESCRICAO': 'PEÇA'})
-    except:
-        pass
+            # for i in range(len(filter_new)):
+            #     filter_new['UNICO'][i] = filter_new['CODIGO'] + filter_new['DATA DA CARGA'][i] + str(filter_new['CAMBÃO'][i])
+            #     filter_new['UNICO'][i] = filter_new['UNICO'][i].replace('/','', regex=True) 
+            
+            filter_new = filter_new.replace({'PROD.':{'':0}})
+            filter_new['PROD.'] = filter_new['PROD.'].astype(int)
+            filter_new['SETOR'] = 'Pintura'
+            #filter_new = filter_new.loc[(filter_new['QT. PRODUZIDA']>0) & (filter_new['TIPO'] != '') & (filter_new['CAMBÃO'] != 0)]
+
+            #compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
+            #compare
+
+            list_index = []
+
+            for i in range(len(filter_new)):
+                if filter_new['PROD.'][i] == 0 and filter_new['TIPO'][i] == '' and filter_new['CAMBÃO'][i] == '':  
+                    ind = filter_new['PROD.'].index[i]
+                    list_index.append(ind)
+            
+            filter_new = filter_new.drop(list_index, axis=0)
+
+            filter_new = filter_new[['UNICO','CODIGO','DESC.','PLAN.','COR','PROD.','CAMBÃO','TIPO','DATA DA CARGA','DATA FINALIZADA','SETOR']]
+
+            filter_new['UNICO'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
+            filter_new['UNICO'] = filter_new['UNICO'].replace("/",'',regex=True)
+            
+            filter_new = filter_new.values.tolist()
+            sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
+
+    if n_op != '':
+        consultar(n_op,table)
+
+def page2():
     
-    table_geral = table_geral[['CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','QT APONT.','CAMBÃO','TIPO']]
+    wks1, sh1,table, table1 = load_datas()
 
-    table_geral = table_geral.drop_duplicates(subset = ['CODIGO'], keep='last')
+    n_op = st.date_input("Data da carga")
+    n_op = n_op.strftime("%d/%m/%Y")
 
-    gb = GridOptionsBuilder.from_dataframe(table_geral)
-    gb.configure_default_column(min_column_width=110)
-    gb.configure_column('QT. PRODUZIDA', editable=True)
-    gb.configure_column('TIPO', editable=True)
-    gb.configure_column('CAMBÃO', editable=True)
-    #gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-    grid_options = gb.build()
-
-    grid_response = AgGrid(table_geral,
-                            gridOptions=grid_options,
-                            data_return_mode='AS_INPUT',
-                            width='100%',
-                            update_mode='VALUE_CHANGED',
-                            height=500,
-                            try_to_convert_back_to_original_types = False,
-                            fit_columns_on_grid_load = True,
-                            allow_unsafe_jscode=True,
-                            enable_enterprise_modules=True,
-                            theme='streamlit',
-                            )    
-
-    filter_new = grid_response['data']
-
-    button2 = st.button('Salvar')
-
-    if button2:
+    def consultar_2(wks1, n_op, sh1, table1):
+            
+        filter_ = table1.loc[(table1['DATA DA CARGA'] == n_op)]        
+                        
+        filter_ = filter_.reset_index(drop=True)
         
-        filter_new['DATA DA CARGA'] = n_op  
-        filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
-        filter_new['UNICO'] = filter_new['CODIGO'] + n_op
-        filter_new = filter_new.replace({'QT. PRODUZIDA':{'':0}})
-        filter_new = filter_new.drop(columns={'QT APONT.'})
-        filter_new['QT. PRODUZIDA'] = filter_new['QT. PRODUZIDA'].astype(int)
-        filter_new['SETOR'] = 'Pintura'
-        #filter_new = filter_new.loc[(filter_new['QT. PRODUZIDA']>0) & (filter_new['TIPO'] != '') & (filter_new['CAMBÃO'] != 0)]
+        filter_ = filter_.loc[(filter_['STATUS'] != 'OK')]
 
-        #compare = table_geral.compare(filter_new, align_axis=1, keep_shape=False, keep_equal=False)
-        #compare
+        filter_ = filter_.rename(columns={'QT APONT.':'PROD.','DATA DA CARGA':'DT. CARGA'})
 
-        list_index = []
+        table_geral = filter_[['CODIGO', 'PEÇA', 'CAMBÃO', 'TIPO', 'PROD.','DT. CARGA','STATUS']]#, 'FLAG','SETOR']]
 
-        for i in range(len(filter_new)):
-            if filter_new['QT. PRODUZIDA'][i] == 0 and filter_new['TIPO'][i] == '' and filter_new['CAMBÃO'][i] == '':  
-                ind = filter_new['QT. PRODUZIDA'].index[i]
-                list_index.append(ind)
-        
-        filter_new = filter_new.drop(list_index, axis=0)
+        gb = GridOptionsBuilder.from_dataframe(table_geral)
+        gb.configure_default_column(min_column_width=100)
+        gb.configure_column('STATUS', editable=True)
+        #gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        grid_options = gb.build()
 
-        filter_new = filter_new[['UNICO','CODIGO','PEÇA','QT_ITENS','COR','QT. PRODUZIDA','CAMBÃO','TIPO','DATA DA CARGA','DATA FINALIZADA','SETOR']]
+        grid_response = AgGrid(table_geral,
+                                gridOptions=grid_options,
+                                data_return_mode='AS_INPUT',
+                                width='100%',
+                                update_mode='VALUE_CHANGED',
+                                height=500,
+                                try_to_convert_back_to_original_types = False,
+                                fit_columns_on_grid_load = True,
+                                allow_unsafe_jscode=True,
+                                enable_enterprise_modules=True,
+                                theme='streamlit',
+                                )    
 
-        filter_new = filter_new.values.tolist()
-        sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
+        filter_new = grid_response['data']
 
-        st.session_state['button'] = False
+        button2 = st.button('Salvar')
+
+        if button2:
+            
+            filter_new['COR'] = ''
+            filter_new['QT PLAN.'] = ''
+            filter_new['COR'] = ''
+            filter_new['SETOR'] = 'Pintura'
+            filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
+            
+            filter_new['FLAG'] = '' 
+
+            filter_new = filter_new[['FLAG','CODIGO', 'PEÇA','QT PLAN.','COR','PROD.','CAMBÃO','TIPO','DT. CARGA','DATA FINALIZADA','SETOR','STATUS']]#, 'FLAG','SETOR']]
+
+            filter_new['CAMBÃO'] = filter_new['CAMBÃO'].astype(str)
+
+            filter_new['FLAG'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
+            filter_new['FLAG'] = filter_new['FLAG'].replace('/','', regex=True)
+
+            filter_new = filter_new.loc[(filter_new['STATUS'] != '')]
+
+            lista_flags = filter_new[['FLAG']].values.tolist()
+            
+            table1 = table1.loc[(table1['STATUS'] == '')]
+
+            for flags in range(len(lista_flags)):
+
+                mudanca_status = table1.loc[(table1['FLAG']) == lista_flags[flags][0]]
+                mudanca_status = mudanca_status.index[0] 
+
+                wks1.update("L" + str(mudanca_status+2), 'OK')
+
+
+    if n_op != '':
+        consultar_2(wks1, n_op,sh1,table1)
+
+page_names_to_funcs = {
+    "Gerar Cambão": page1,
+    "Cambão": page2,
+}
+
+selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
+page_names_to_funcs[selected_page]() 
