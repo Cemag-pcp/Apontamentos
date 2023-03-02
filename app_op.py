@@ -224,7 +224,7 @@ def page2():
                     df2['Espessura'] = new_carac['Espessura'][0]
                     df2['op'] = n_op
                     df2['op'] = df2['op'].astype(str)
-                    df2['data finalização'] = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                    df2['data finalização'] = datetime.now().strftime('%d/%m/%Y')
                     df2['Quantidade'] = (df2['Quantidade'] / caract_op['qt. chapa'][0]) * new_carac['qt. chapa'][0]
                     df2['Operador'] = operador
 
@@ -234,7 +234,9 @@ def page2():
                     # reordenando colunas
                 
                     df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
-                            'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'data finalização']]    
+                            'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'data finalização']]   
+
+                    df2 = df2.drop_duplicates()
                             
                     # Guardar no banco de dados
                 
