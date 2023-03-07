@@ -271,7 +271,7 @@ def page2():
 
 page_names_to_funcs = {
     "Gerar Cambão": page1,
-    "Cambão": page2,
+    "Finalizar Cambão": page2,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
