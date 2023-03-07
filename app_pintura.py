@@ -17,7 +17,7 @@ import numpy as np
 # Connect to Google Sheets
 # ======================================= #
 
-st.markdown("<h1 style='text-align: center; font-size:60px; color: White'>Apontamento de produção Pintura</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; font-size:60px; color: Black'>Apontamento de produção Pintura</h1>", unsafe_allow_html=True)
 
 #with st.sidebar:
 image = Image.open('logo-cemagL.png')
@@ -182,6 +182,10 @@ def page1():
 
             filter_new['UNICO'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
             filter_new['UNICO'] = filter_new['UNICO'].replace("/",'',regex=True)
+
+            for tipo in range(filter_new):
+                if filter_new['TIPO'][tipo] == '':
+                    filter_new['TIPO'][tipo] = 'PO'
             
             filter_new = filter_new.values.tolist()
             sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
