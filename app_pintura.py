@@ -19,9 +19,9 @@ import numpy as np
 
 st.markdown("<h1 style='text-align: center; font-size:60px; color: Black'>Apontamento de produção Pintura</h1>", unsafe_allow_html=True)
 
-#with st.sidebar:
-image = Image.open('logo-cemagL.png')
-st.image(image, width=300)
+with st.sidebar:
+    image = Image.open('logo-cemagL.png')
+    st.image(image, width=300)
 #st.write(datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
 
 #@st.cache(allow_output_mutation=True)
