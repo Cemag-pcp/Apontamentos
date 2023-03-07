@@ -3,7 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import streamlit as st
 from gspread_formatting import *
-from st_aggrid import AgGrid
+from st_aggrid import AgGrid, JsCode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 import time
 from PIL import Image
@@ -88,10 +88,50 @@ def page1():
         gb.configure_column('PROD.', editable=True,)
         gb.configure_column('TIPO', editable=True, cellEditor='agSelectCellEditor', cellEditorParams={'values': dropdown_tipo})
         gb.configure_column('CAMBÃO', editable=True)
-        #gb.configure_column('QT_ITENS', cellStyle={'color': 'white', 'font-size': '15px'}, suppressMenu=True, wrapHeaderText=True, autoHeaderHeight=True)
-        #gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-        #custom_css = {".ag-header-cell-text": {"font-size": "15px", 'text-overflow': 'revert;', 'font-weight': 700},
-        #".ag-theme-streamlit": {'transform': "scale(0.8)", "transform-origin": '0 0'}}
+        
+        cellstyle_jscode = JsCode("""
+        function(params){
+            if (params.value == 'AV') {
+                return {
+                    'color': 'black', 
+                    'backgroundColor': 'yellow',
+                }
+            }
+            if (params.value == 'VJ') {
+                return {
+                    'color': 'white', 
+                    'backgroundColor': 'green',
+                }
+            }
+            if (params.value == 'CO') {
+                return {
+                    'color': 'white', 
+                    'backgroundColor': 'gray',
+                }
+            }
+            if (params.value == 'LC') {
+                return {
+                    'color': 'white', 
+                    'backgroundColor': 'orange',
+                }
+            }
+            if (params.value == 'VM') {
+                return {
+                    'color': 'white', 
+                    'backgroundColor': 'red',
+                }
+            } 
+            if (params.value == 'AN') {
+                return {
+                    'color': 'white', 
+                    'backgroundColor': 'blue',
+                }
+            }                        
+        }
+        """)
+
+        gb.configure_column('COR', cellStyle=cellstyle_jscode)
+
         grid_options = gb.build()
 
         grid_response = AgGrid(table_geral,
@@ -104,6 +144,7 @@ def page1():
                                 fit_columns_on_grid_load = True,
                                 enable_enterprise_modules=True,
                                 theme='streamlit',
+                                allow_unsafe_jscode=True
                                 )    
 
         filter_new = grid_response['data']
