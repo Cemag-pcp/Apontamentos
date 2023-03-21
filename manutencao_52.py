@@ -359,100 +359,168 @@ def gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manuten
         
         return df_vazio
 
+def minutos(hora_inicio, hora_fim):
+    
+    hora_fim  = str(hora_fim)
+    hora_inicio = str(hora_inicio)
+
+    # Criar dois objetos datetime.time com as horas de início e fim
+    hora_inicio = datetime.time(int(hora_inicio[:2]),int(hora_inicio[3:5]),int(hora_inicio[6:8])) # 12:00:00
+    hora_fim = datetime.time(int(hora_fim[:2]),int(hora_fim[3:5]),int(hora_fim[6:8])) # 14:00:00
+
+    # Converter os objetos datetime.time em objetos datetime.datetime usando a função datetime.combine
+    # Usar uma data arbitrária como primeiro argumento da função
+    data = datetime.date(2023, 3, 21) # 21/03/2023
+    dt_inicio = datetime.datetime.combine(data, hora_inicio)
+    dt_fim = datetime.datetime.combine(data, hora_fim)
+
+    # Subtrair os dois objetos datetime.datetime e obter um objeto datetime.timedelta
+    diferenca = dt_fim - dt_inicio
+
+    # Usar o método total_seconds do objeto datetime.timedelta para obter o resultado em segundos
+    segundos = diferenca.total_seconds()
+
+    # Dividir por 60 para obter o resultado em minutos
+    minutos = segundos / 60
+
+    return minutos
+
 def page1():
 
-    st.markdown("<h1 style='text-align: center; font-size:60px; color: White'>Cadastro de máquinas</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-size:40px; color: White'>Cadastro de equipamentos</h1>", unsafe_allow_html=True)
     st.markdown("<h1          </h1>", unsafe_allow_html=True)
 
-    with st.form('cadastrar maquina', clear_on_submit=True):
+    tab1, tab2 = st.tabs(["Cadastrar equipamento", "Importar arquivo"])
 
-        table, wks, sh, table2,table3 = exibir()
-        setores_cadastrados = table2['Setor'].unique().tolist()
-        
-        lista_setores = ['Selecione']
-
-        for setor in range(len(setores_cadastrados)):
-            lista_setores.append(setores_cadastrados[setor])
-
-        grupo = st.selectbox("Setor", lista_setores)
-        codigo_maquina = st.text_input("Código único da máquina", placeholder="Exemplo: SO-MS-10").upper()
-        maquina = st.text_input("Descrição da máquina", placeholder='Exemplo: Máquina de solda')
-        classificacao = st.select_slider("Classificação", options=['A','B','C'])
-        ultima_manutencao = st.date_input("Última manutenção")
-        periodicidade = st.selectbox('Selecione a periodicidade',('Selecione','Semanal','Quinzenal','Bimestral'))
-        submitted_button = st.form_submit_button("Run")
-
-        if submitted_button:
+    with tab1:
+        with st.form('cadastrar maquina', clear_on_submit=True):
             
-            # verificando se os campos estão preenchidos
-            if grupo != 'Selecione' and maquina != '' and ultima_manutencao != '' and classificacao != '' and periodicidade != 'Selecione' and codigo_maquina != '':
-                
-                for string in range(len(table)):
-                    table['Código da máquina'][string] = table['Código da máquina'][string].upper()
+            table, wks, sh, table2,table3 = exibir()
+            setores_cadastrados = table2['Setor'].unique().tolist()
+            
+            lista_setores = ['Selecione']
 
-                # verificando se a máquina ja existe na lista de cadastro
-                try:
-                    if codigo_maquina in table['Código da máquina'].values.tolist():
-                        st.warning("Código único da máquina ja existe", icon="⚠️")
-                    else:
+            for setor in range(len(setores_cadastrados)):
+                lista_setores.append(setores_cadastrados[setor])
+
+            grupo = st.selectbox("Setor", lista_setores)
+            
+            c1,c2 = st.columns(2)        
+            
+            with c1:
+                codigo_maquina = st.text_input("Código único da máquina", placeholder="Exemplo: SO-MS-10").upper()
+                maquina = st.text_input("Descrição da máquina", placeholder='Exemplo: Máquina de solda')
+            
+            with c2:
+                periodicidade = st.selectbox('Selecione a periodicidade',('Selecione','Semanal','Quinzenal','Bimestral'))
+                ultima_manutencao = st.date_input("Última manutenção")
+            
+            classificacao = st.select_slider("Classificação", options=['A','B','C'])
+            submitted_button = st.form_submit_button("Cadastrar")
+
+            if submitted_button:
+                
+                # verificando se os campos estão preenchidos
+                if grupo != 'Selecione' and maquina != '' and ultima_manutencao != '' and classificacao != '' and periodicidade != 'Selecione' and codigo_maquina != '':
+                    
+                    for string in range(len(table)):
+                        table['Código da máquina'][string] = table['Código da máquina'][string].upper()
+
+                    # verificando se a máquina ja existe na lista de cadastro
+                    try:
+                        if codigo_maquina in table['Código da máquina'].values.tolist():
+                            st.warning("Código único da máquina ja existe", icon="⚠️")
+                        else:
+                            df = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
+
+                            save_db(df)
+
+                            st.markdown("<h1 style='text-align: center; font-size:20px; color: Green'>Máquina cadastrada</h1>", unsafe_allow_html=True)
+                    except:
                         df = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
 
                         save_db(df)
 
-                        st.markdown("<h1 style='text-align: center; font-size:20px; color: Green'>Máquina cadastrada</h1>", unsafe_allow_html=True)
-                except:
-                    df = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
+                        st.success("", icon="✅")
+                else:
+                    st.warning("Preencha todos os campos!", icon="⚠️")
 
-                    save_db(df)
+    with tab2:
+        
+        uploaded_file = st.file_uploader("Escolha o arquivo", type="xlsx")
 
-                    st.success("", icon="✅")
-            else:
-                st.warning("Preencha todos os campos!", icon="⚠️")
-            
+        if uploaded_file is not None:
+            df = pd.read_excel(uploaded_file)
+
+            df = ler_arquivo(df)
+
+            save_db(df)
+
+            st.success('', icon="✅")   
+    
 def page2():
-
-    st.markdown("<h1 style='text-align: center; font-size:60px; color: White'>Upload de arquivo</h1>", unsafe_allow_html=True)
-    st.markdown("<h1          </h1>", unsafe_allow_html=True)
-
-    uploaded_file = st.file_uploader("Escolha o arquivo", type="xlsx")
-
-    if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file)
-
-        df = ler_arquivo(df)
-
-        save_db(df)
-
-        st.success('', icon="✅")
     
-def page3():
-    
-    st.markdown("<h1 style='text-align: center; font-size:60px; color: White'>Última manutenção</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-size:40px; color: White'>Última manutenção</h1>", unsafe_allow_html=True)
     st.markdown("<h1          </h1>", unsafe_allow_html=True)
 
     table,wks,sh,table2, table3 = exibir()
-   
-    maquinas_cadastradas = table['Código da máquina'].unique().tolist() 
+    
+    lista_setores = ['Selecione']
+    setores_cadastrados = table2['Setor'].unique().tolist()
+
+    for setor in range(len(setores_cadastrados)):
+        lista_setores.append(setores_cadastrados[setor])
+
+    c3,c4,c5 = st.columns(3)
+    with c3:
+        st.write('')
+
+    with c4:
+        style = "<style>h2 {text-align: center; font-size:20px}</style>"
+        st.markdown(style, unsafe_allow_html=True)
+        c4.header('Filtros')
+        grupo = st.selectbox("Setor", lista_setores)
+
+    with c5:
+        st.write('')
+
+    if grupo != 'Selecione':
+        maquinas_cadastradas = table[table['Setor'] == grupo] 
+        maquinas_cadastradas = maquinas_cadastradas['Código da máquina'].unique().tolist() 
+    else:
+        maquinas_cadastradas = table['Código da máquina'].unique().tolist() 
 
     lista_maquinas = ['Selecione']
 
     for maquinas in range(len(maquinas_cadastradas)):
-        lista_maquinas.append(maquinas_cadastradas[maquinas])
+        lista_maquinas.append(maquinas_cadastradas[maquinas]) 
 
     with st.form("informar ultima manutencao", clear_on_submit=True):
-    
-        codigo_maquina = st.selectbox("ID da máquina", lista_maquinas)
-        ultima_manutencao = st.date_input("Data da última manutenção")
-        tempo_manutencao = st.number_input('Tempo de manutenção (EM MINUTOS):')
+        c1,c2 = st.columns(2)
+
+        with c1:
+            codigo_maquina = st.selectbox("ID da máquina", lista_maquinas)
+            ultima_manutencao = st.date_input("Data da última manutenção")
+            pessoa = st.selectbox("Pessoa", ['Selecione','Luan', 'Luan'])
+        with c2:    
+            hr_inicio = st.time_input("Hora de ínicio")
+            hr_fim = st.time_input("Hora de finalização")
+
+        observacao = st.text_area("Observação")
         
         submitted = st.form_submit_button("Submit")
                 
         if submitted:
 
-            if tempo_manutencao != 0 and codigo_maquina != 'Selecione':
+            if codigo_maquina != 'Selecione' and pessoa != 'Selecione':
             
+                tempo_manutencao = minutos(hr_inicio, hr_fim)
+
                 filtrar_maquina = table[table['Código da máquina'] == codigo_maquina].reset_index()
-                filtrar_maquina = filtrar_maquina[['index','Setor','Código da máquina','Descrição da máquina','Classificação','Periodicidade','Última Manutenção']]
+                filtrar_maquina = filtrar_maquina[['index','Setor',
+                                                   'Código da máquina','Descrição da máquina',
+                                                   'Classificação','Periodicidade','Última Manutenção']]
+                
                 index_planilha = filtrar_maquina['index'][0]
 
                 grupo=filtrar_maquina['Setor'][0]
@@ -460,14 +528,22 @@ def page3():
                 periodicidade=filtrar_maquina['Periodicidade'][0]
                 maquina=filtrar_maquina['Descrição da máquina'][0]
                 
-                filtrar_maquina['Tempo de manutenção'] = tempo_manutencao    
+                filtrar_maquina['Hora de início'] = str(hr_inicio)
+                filtrar_maquina['Hora de fim'] = str(hr_fim)
+                filtrar_maquina['Comentário'] = observacao
+                filtrar_maquina['Pessoa'] = pessoa
+                filtrar_maquina['Tempo de manutenção'] = tempo_manutencao
 
                 manutencao_gerada = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
 
                 maquina_lista  = manutencao_gerada.values.tolist()            
                 wks.update("A" + str(index_planilha + 2), maquina_lista) 
 
-                filtrar_maquina = filtrar_maquina[['Setor','Código da máquina','Descrição da máquina','Classificação','Periodicidade','Última Manutenção','Tempo de manutenção']].values.tolist()
+                filtrar_maquina = filtrar_maquina[['Setor','Código da máquina',
+                                                   'Descrição da máquina','Classificação',
+                                                   'Periodicidade','Última Manutenção','Pessoa',
+                                                   'Comentário','Hora de início', 'Hora de fim', 'Tempo de manutenção']].values.tolist()
+                
                 sh.values_append('bd_historico_manutencao', {'valueInputOption': 'RAW'}, {'values': filtrar_maquina})
 
                 st.success("", icon="✅")
@@ -475,12 +551,13 @@ def page3():
             else:
                 st.warning("Preencha todos os campos", icon='⚠️')
 
-def page4():
+def page3():
     
     table, wks, sh, table2, table3 = exibir()
 
     data = date.today().strftime(format="%d/%m/%Y")
     data = pd.to_datetime(data, format="%d/%m/%Y") # data de hoje (segunda-feira)
+    
     lista_indices = []
 
     for i in range(1,7):
@@ -505,16 +582,18 @@ def page4():
 
             maquinas = pd.DataFrame(table_maquinas['Código da máquina'].copy())
 
-            media_tempos = table3[['Código da máquina','Descrição da máquina','Criticidade','tempo de manutencao']]
-            media_tempos = pd.DataFrame(media_tempos.groupby(['Código da máquina','Descrição da máquina','Criticidade']).mean()).reset_index()
-
+            media_tempos = table3[['Código da máquina','Criticidade','tempo de manutencao']]
+            media_tempos = pd.DataFrame(media_tempos.groupby(['Código da máquina','Criticidade']).mean()).reset_index()
+            media_tempos['Data real'] = data - timedelta(i)
+            i = i-1
+            
             maquinas = maquinas.merge(media_tempos)
 
             maquinas_merge = maquinas_merge.append(maquinas).reset_index(drop=True)
 
         else:
             pass
-
+        
     # Criando as listas de equipamentos e tempos
 
     equipamentos = maquinas_merge['Código da máquina'].values.tolist()
@@ -523,6 +602,9 @@ def page4():
     df_planejamento = pd.DataFrame(data=equipamentos, columns=['Código da máquina'])
     df_planejamento['Dia'] = ''
 
+    data = date.today().strftime(format="%d/%m/%Y")
+    data = pd.to_datetime(data, format="%d/%m/%Y") # data de hoje (segunda-feira)
+    
     # Criando a variável de tempo máximo
     tempo_maximo = 540
 
@@ -530,32 +612,35 @@ def page4():
     for i in range(len(equipamentos)):
         # Verificando se o tempo do equipamento cabe no dia atual
         if tempos[i] <= tempo_maximo:
-            # Imprimindo o equipamento e o dia da manutenção
-            #print(f"O equipamento {equipamentos[i]} será mantido no dia {dia_atual}.")
-            # Atualizando o tempo máximo
+
             tempo_maximo = tempo_maximo - tempos[i]
+
         else:
             # Incrementando o dia atual
             data = data + timedelta(1)
-            # Imprimindo o equipamento e o novo dia da manutenção
-            #print(f"O equipamento {equipamentos[i]} será mantido no dia {dia_atual}.")
-            # Atualizando o tempo máximo
             tempo_maximo = 540 - tempos[i]
 
         df_planejamento['Dia'][i] = data
     
     df_planejamento = df_planejamento[['Dia','Código da máquina']]
-    df_planejamento = df_planejamento.merge(maquinas_merge)
+    df_planejamento = df_planejamento.merge(maquinas_merge, how='inner')
     
     df_planejamento['Dia'] = pd.to_datetime(df_planejamento['Dia'])
     df_planejamento['Dia'] = df_planejamento['Dia'].dt.strftime("%d/%m/%Y")
+
+    df_planejamento['Data real'] = pd.to_datetime(df_planejamento['Data real'])
+    df_planejamento['Data real'] = df_planejamento['Data real'].dt.strftime("%d/%m/%Y")
+
+    table = table[['Código da máquina', 'Descrição da máquina', 'Setor']]
+    df_planejamento = df_planejamento.merge(table)
+
+    df_planejamento = df_planejamento[['Data real','Dia','Código da máquina', 'Descrição da máquina', 'Setor', 'Criticidade', 'tempo de manutencao']]
 
     salvar_agendamento(df_planejamento)
 
 page_names_to_funcs = {
     "Cadastrar": page1,
-    "Upload de arquivo": page2,
-    "Informar manutenção": page3,
+    "Informar manutenção": page2,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
