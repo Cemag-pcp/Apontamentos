@@ -87,7 +87,8 @@ def salvar_agendamento(df):
 
 def ler_arquivo(df):
     
-    # df = pd.read_excel('df_manutencao.xlsx')
+
+    df = pd.read_excel('df_manutencao.xlsx')
     df_maquinas = pd.DataFrame(data = df, columns=['Setor','Código da máquina','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
     
     # Converte a coluna de data para o tipo datetime
@@ -170,6 +171,29 @@ def ler_arquivo(df):
                                         
                 # Avança para a próxima data de manutenção
                 data_manutencao = data_manutencao + 6 * BDay()
+
+        if periodicidade == 'Semestral':
+            nome_maquina = row['Código da máquina']
+            desc_maquina = row['Descrição da máquina']
+            classificacao = row['Classificação']
+            primeira_manutencao = row['Última Manutenção']
+            periodicidade = row['Periodicidade']
+            grupo = row['Setor']
+            
+            semana_inicial = primeira_manutencao.isocalendar().week
+            data_manutencao = primeira_manutencao + 59 * BDay()
+            
+            # Loop pelas semanas
+            for j in range(52-semana_inicial):
+                # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
+                while data_manutencao.weekday() in [5, 6]:
+                    data_manutencao = data_manutencao + 1 * BDay()
+        
+                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Setor': grupo, 'Classificação': classificacao},ignore_index=True)
+                                        
+                # Avança para a próxima data de manutenção
+                data_manutencao = data_manutencao + 59 * BDay()
                 
     df_manutencao['Week_Number'] = df_manutencao['Última Manutenção'].dt.isocalendar().week
     df_manutencao['year'] = df_manutencao['Última Manutenção'].dt.isocalendar().year
@@ -202,12 +226,13 @@ def ler_arquivo(df):
         df_52semanas = pd.DataFrame(columns=list_52, index=[index]) 
         df_filter = df_manutencao.loc[(df_manutencao['Código da máquina'] == lista_maq[i])] 
         df_filter = df_filter.reset_index(drop=True)
-        df_52semanas['Código da máquina'] = df_filter['Código da máquina'][i]
-        df_52semanas['Descrição da máquina'] = df_filter['Descrição da máquina'][i]
-        df_52semanas['Periodicidade'] = df_filter['Periodicidade'][i]
-        df_52semanas['Classificação'] = df_filter['Classificação'][i]
-        df_52semanas['Setor'] = df_filter['Setor'][i]
-        df_52semanas['Última manutenção'] = df_filter['primeira_manutencao'][i]
+
+        df_52semanas['Código da máquina'] = df_filter['Código da máquina'][0]
+        df_52semanas['Descrição da máquina'] = df_filter['Descrição da máquina'][0]
+        df_52semanas['Periodicidade'] = df_filter['Periodicidade'][0]
+        df_52semanas['Classificação'] = df_filter['Classificação'][0]
+        df_52semanas['Setor'] = df_filter['Setor'][0]
+        df_52semanas['Última manutenção'] = df_filter['primeira_manutencao'][0]
         
         index = index + 1
         
@@ -223,141 +248,165 @@ def ler_arquivo(df):
 
 def gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade):
 
-        lista_campos = []
-        
-        lista_campos.append([grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade])
-        
-        df_maquinas = pd.DataFrame(data = lista_campos, columns=['Grupo','Código da máquina','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
-        
-        # Converte a coluna de data para o tipo datetime
-        df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
-        
-        # Cria um DataFrame vazio para armazenar o planejamento de manutenção
-        df_manutencao = pd.DataFrame(columns=['Última Manutenção', 'Código da máquina'])
-        manut_outras_maquinas = False
+    lista_campos = []
+    
+    lista_campos.append([grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade])
+    
+    df_maquinas = pd.DataFrame(data = lista_campos, columns=['Grupo','Código da máquina','Descrição da máquina','Classificação','Última Manutenção','Periodicidade'])
+    
+    # Converte a coluna de data para o tipo datetime
+    df_maquinas['Última Manutenção'] = pd.to_datetime(df_maquinas['Última Manutenção'])
+    
+    # Cria um DataFrame vazio para armazenar o planejamento de manutenção
+    df_manutencao = pd.DataFrame(columns=['Última Manutenção', 'Código da máquina'])
+    manut_outras_maquinas = False
 
-        # Loop pelas máquinas
-        for i, row in df_maquinas.iterrows():
-            # Define as variáveis da máquina atual
+    # Loop pelas máquinas
+    for i, row in df_maquinas.iterrows():
+        # Define as variáveis da máquina atual
+        periodicidade = row['Periodicidade']
+        
+        if periodicidade == 'Quinzenal':
+            nome_maquina = row['Código da máquina']
+            desc_maquina = row['Descrição da máquina']
+            primeira_manutencao = row['Última Manutenção']
             periodicidade = row['Periodicidade']
+            grupo = row['Grupo']
             
-            if periodicidade == 'Quinzenal':
-                nome_maquina = row['Código da máquina']
-                desc_maquina = row['Descrição da máquina']
-                primeira_manutencao = row['Última Manutenção']
-                periodicidade = row['Periodicidade']
-                grupo = row['Grupo']
-                
-                semana_inicial = primeira_manutencao.isocalendar().week
-                data_manutencao = primeira_manutencao + 14 * BDay()
-                
-                # Loop pelas semanas
-                for j in range(52-semana_inicial):
-                    # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
-                    while data_manutencao.weekday() in [5, 6]:
-                        data_manutencao = data_manutencao + 1 * BDay()
+            semana_inicial = primeira_manutencao.isocalendar().week
+            data_manutencao = primeira_manutencao + 14 * BDay()
             
-                    df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                        'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                        
-                    # Avança para a próxima data de manutenção
-                    data_manutencao = data_manutencao + 14 * BDay()
-            
-            if periodicidade == 'Bimestral':
-                nome_maquina = row['Código da máquina']
-                desc_maquina = row['Descrição da máquina']
-                classificacao = row['Classificação']
-                primeira_manutencao = row['Última Manutenção']
-                periodicidade = row['Periodicidade']
-                grupo = row['Grupo']
-                
-                semana_inicial = primeira_manutencao.isocalendar().week
-                data_manutencao = primeira_manutencao + 39 * BDay()
-                
-                # Loop pelas semanas
-                for j in range(52-semana_inicial):
-                    # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
-                    while data_manutencao.weekday() in [5, 6]:
-                        data_manutencao = data_manutencao + 1 * BDay()
-            
-                    df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                        'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                                            
-                    # Avança para a próxima data de manutenção
-                    data_manutencao = data_manutencao + 39 * BDay()
+            # Loop pelas semanas
+            for j in range(52-semana_inicial):
+                # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
+                while data_manutencao.weekday() in [5, 6]:
+                    data_manutencao = data_manutencao + 1 * BDay()
+        
+                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
                     
-            if periodicidade == 'Semanal':
-                nome_maquina = row['Código da máquina']
-                desc_maquina = row['Descrição da máquina']
-                classificacao = row['Classificação']
-                primeira_manutencao = row['Última Manutenção']
-                periodicidade = row['Periodicidade']
-                grupo = row['Grupo']
-                
-                semana_inicial = primeira_manutencao.isocalendar().week
-                data_manutencao = primeira_manutencao + 6 * BDay()
-                
-                # Loop pelas semanas
-                for j in range(52-semana_inicial):
-                    # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
-                    while data_manutencao.weekday() in [5, 6]:
-                        data_manutencao = data_manutencao + 1 * BDay()
+                # Avança para a próxima data de manutenção
+                data_manutencao = data_manutencao + 14 * BDay()
+        
+        if periodicidade == 'Bimestral':
+            nome_maquina = row['Código da máquina']
+            desc_maquina = row['Descrição da máquina']
+            classificacao = row['Classificação']
+            primeira_manutencao = row['Última Manutenção']
+            periodicidade = row['Periodicidade']
+            grupo = row['Grupo']
             
-                    df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
-                                                        'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
-                                            
-                    # Avança para a próxima data de manutenção
-                    data_manutencao = data_manutencao + 6 * BDay()
-                    
-        df_manutencao['Week_Number'] = df_manutencao['Última Manutenção'].dt.isocalendar().week
-        df_manutencao['year'] = df_manutencao['Última Manutenção'].dt.isocalendar().year
+            semana_inicial = primeira_manutencao.isocalendar().week
+            data_manutencao = primeira_manutencao + 39 * BDay()
+            
+            # Loop pelas semanas
+            for j in range(52-semana_inicial):
+                # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
+                while data_manutencao.weekday() in [5, 6]:
+                    data_manutencao = data_manutencao + 1 * BDay()
         
-        df_manutencao['Week_Number'] = df_manutencao['Week_Number'].astype(int) 
+                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+                                        
+                # Avança para a próxima data de manutenção
+                data_manutencao = data_manutencao + 39 * BDay()
+                
+        if periodicidade == 'Semanal':
+            nome_maquina = row['Código da máquina']
+            desc_maquina = row['Descrição da máquina']
+            classificacao = row['Classificação']
+            primeira_manutencao = row['Última Manutenção']
+            periodicidade = row['Periodicidade']
+            grupo = row['Grupo']
+            
+            semana_inicial = primeira_manutencao.isocalendar().week
+            data_manutencao = primeira_manutencao + 6 * BDay()
+            
+            # Loop pelas semanas
+            for j in range(52-semana_inicial):
+                # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
+                while data_manutencao.weekday() in [5, 6]:
+                    data_manutencao = data_manutencao + 1 * BDay()
         
-        df_manutencao = df_manutencao.loc[(df_manutencao['year'] == 2023)] 
+                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+                                        
+                # Avança para a próxima data de manutenção
+                data_manutencao = data_manutencao + 6 * BDay()
+
+        if periodicidade == 'Semestral':
+            nome_maquina = row['Código da máquina']
+            desc_maquina = row['Descrição da máquina']
+            classificacao = row['Classificação']
+            primeira_manutencao = row['Última Manutenção']
+            periodicidade = row['Periodicidade']
+            grupo = row['Grupo']
+            
+            semana_inicial = primeira_manutencao.isocalendar().week
+            data_manutencao = primeira_manutencao + 180 * BDay()
+            
+            # Loop pelas semanas
+            for j in range(52-semana_inicial):
+                # Se a data de manutenção cair em um final de semana, avança para a segunda-feira seguinte
+                while data_manutencao.weekday() in [5, 6]:
+                    data_manutencao = data_manutencao + 1 * BDay()
         
-        df_manutencao['Última Manutenção'] = df_manutencao['Última Manutenção'].dt.strftime("%d-%m-%Y") 
+                df_manutencao = df_manutencao.append({'primeira_manutencao': primeira_manutencao.strftime("%d/%m/%Y"), 'Última Manutenção': data_manutencao,'Código da máquina': nome_maquina,
+                                                    'Descrição da máquina': desc_maquina,'Periodicidade': periodicidade, 'Grupo': grupo, 'Classificação': classificacao},ignore_index=True)
+                                        
+                # Avança para a próxima data de manutenção
+                data_manutencao = data_manutencao + 180 * BDay()
+
+
+    df_manutencao['Week_Number'] = df_manutencao['Última Manutenção'].dt.isocalendar().week
+    df_manutencao['year'] = df_manutencao['Última Manutenção'].dt.isocalendar().year
+    
+    df_manutencao['Week_Number'] = df_manutencao['Week_Number'].astype(int) 
+    
+    df_manutencao = df_manutencao.loc[(df_manutencao['year'] == 2023)] 
+    
+    df_manutencao['Última Manutenção'] = df_manutencao['Última Manutenção'].dt.strftime("%d-%m-%Y") 
+    
+    ############### 52 semanas ##################
+    
+    lista_maq = df_manutencao['Código da máquina'].unique()
+    
+    df_filter = df_manutencao.loc[(df_manutencao['Código da máquina'] == lista_maq[i])] 
+    
+    df_vazio = pd.DataFrame()
+    
+    list_52 = ['Grupo', 'Código da máquina', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção']
+    
+    for li in range(1,53):
+        list_52.append(li)
         
-        ############### 52 semanas ##################
-        
-        lista_maq = df_manutencao['Código da máquina'].unique()
-        
+    index = 0
+    
+    df_vazio = pd.DataFrame()
+    
+    for i in range(len(lista_maq)):
+            
+        df_52semanas = pd.DataFrame(columns=list_52, index=[index]) 
         df_filter = df_manutencao.loc[(df_manutencao['Código da máquina'] == lista_maq[i])] 
+        df_filter = df_filter.reset_index(drop=True)
+        df_52semanas['Código da máquina'] = df_filter['Código da máquina'][i]
+        df_52semanas['Descrição da máquina'] = df_filter['Descrição da máquina'][i]
+        df_52semanas['Periodicidade'] = df_filter['Periodicidade'][i]
+        df_52semanas['Classificação'] = df_filter['Classificação'][i]
+        df_52semanas['Grupo'] = df_filter['Grupo'][i]
+        df_52semanas['Última manutenção'] = df_filter['primeira_manutencao'][i]
         
-        df_vazio = pd.DataFrame()
+        index = index + 1
         
-        list_52 = ['Grupo', 'Código da máquina', 'Descrição da máquina','Classificação', 'Periodicidade','Última manutenção']
-        
-        for li in range(1,53):
-            list_52.append(li)
+        for k in range(len(df_filter)):
+            number_week = df_filter['Week_Number'][k]
+            df_52semanas[number_week] = df_filter['Última Manutenção'][k]
             
-        index = 0
-        
-        df_vazio = pd.DataFrame()
-        
-        for i in range(len(lista_maq)):
-                
-            df_52semanas = pd.DataFrame(columns=list_52, index=[index]) 
-            df_filter = df_manutencao.loc[(df_manutencao['Código da máquina'] == lista_maq[i])] 
-            df_filter = df_filter.reset_index(drop=True)
-            df_52semanas['Código da máquina'] = df_filter['Código da máquina'][i]
-            df_52semanas['Descrição da máquina'] = df_filter['Descrição da máquina'][i]
-            df_52semanas['Periodicidade'] = df_filter['Periodicidade'][i]
-            df_52semanas['Classificação'] = df_filter['Classificação'][i]
-            df_52semanas['Grupo'] = df_filter['Grupo'][i]
-            df_52semanas['Última manutenção'] = df_filter['primeira_manutencao'][i]
-            
-            index = index + 1
-            
-            for k in range(len(df_filter)):
-                number_week = df_filter['Week_Number'][k]
-                df_52semanas[number_week] = df_filter['Última Manutenção'][k]
-                
-            df_vazio = df_vazio.append(df_52semanas) 
-        
-        df_vazio = df_vazio.replace(np.nan, '')
-        
-        return df_vazio
+        df_vazio = df_vazio.append(df_52semanas) 
+    
+    df_vazio = df_vazio.replace(np.nan, '')
+    
+    return df_vazio
 
 def minutos(hora_inicio, hora_fim):
     
@@ -385,7 +434,7 @@ def minutos(hora_inicio, hora_fim):
 
     return minutos
 
-def page1():
+def page1(): # cadastro de peças
 
     st.markdown("<h1 style='text-align: center; font-size:40px; color: White'>Cadastro de equipamentos</h1>", unsafe_allow_html=True)
     st.markdown("<h1          </h1>", unsafe_allow_html=True)
@@ -393,7 +442,7 @@ def page1():
     tab1, tab2 = st.tabs(["Cadastrar equipamento", "Importar arquivo"])
 
     with tab1:
-        with st.form('cadastrar maquina', clear_on_submit=True):
+        with st.form('cadastrar maquina', clear_on_submit=False):
             
             table, wks, sh, table2,table3 = exibir()
             setores_cadastrados = table2['Setor'].unique().tolist()
@@ -412,16 +461,21 @@ def page1():
                 maquina = st.text_input("Descrição da máquina", placeholder='Exemplo: Máquina de solda')
             
             with c2:
-                periodicidade = st.selectbox('Selecione a periodicidade',('Selecione','Semanal','Quinzenal','Bimestral'))
+                periodicidade = st.multiselect('Selecione a periodicidade',['Semanal','Quinzenal','Bimestral','Semestral'],
+                                                max_selections=1,
+                                                help='Você pode selecionar apenas uma opção.')
+                
                 ultima_manutencao = st.date_input("Última manutenção")
             
-            classificacao = st.select_slider("Classificação", options=['A','B','C'])
+            classificacao = st.select_slider("Criticidade",
+                                              options=['A','B','C'])
+            
             submitted_button = st.form_submit_button("Cadastrar")
 
             if submitted_button:
                 
                 # verificando se os campos estão preenchidos
-                if grupo != 'Selecione' and maquina != '' and ultima_manutencao != '' and classificacao != '' and periodicidade != 'Selecione' and codigo_maquina != '':
+                if grupo != 'Selecione' and maquina != '' and ultima_manutencao != '' and classificacao != '' and periodicidade != '' and codigo_maquina != '':
                     
                     for string in range(len(table)):
                         table['Código da máquina'][string] = table['Código da máquina'][string].upper()
@@ -435,7 +489,7 @@ def page1():
 
                             save_db(df)
 
-                            st.markdown("<h1 style='text-align: center; font-size:20px; color: Green'>Máquina cadastrada</h1>", unsafe_allow_html=True)
+                            st.success("", icon="✅")
                     except:
                         df = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
 
@@ -458,7 +512,7 @@ def page1():
 
             st.success('', icon="✅")   
     
-def page2():
+def page2(): # informar manutencao
     
     st.markdown("<h1 style='text-align: center; font-size:40px; color: White'>Última manutenção</h1>", unsafe_allow_html=True)
     st.markdown("<h1          </h1>", unsafe_allow_html=True)
@@ -484,27 +538,32 @@ def page2():
     with c5:
         st.write('')
 
+    table['codigo_descricao'] = table['Código da máquina'] + " - " + table['Descrição da máquina']
+
     if grupo != 'Selecione':
         maquinas_cadastradas = table[table['Setor'] == grupo] 
-        maquinas_cadastradas = maquinas_cadastradas['Código da máquina'].unique().tolist() 
+        codigos_descricao = maquinas_cadastradas[['Código da máquina', 'codigo_descricao']]
+        maquinas_cadastradas = codigos_descricao['codigo_descricao'].unique().tolist() 
     else:
-        maquinas_cadastradas = table['Código da máquina'].unique().tolist() 
+        maquinas_cadastradas = table
+        codigos_descricao = maquinas_cadastradas[['Código da máquina', 'codigo_descricao']]
+        maquinas_cadastradas = codigos_descricao['codigo_descricao'].unique().tolist() 
 
     lista_maquinas = ['Selecione']
 
     for maquinas in range(len(maquinas_cadastradas)):
         lista_maquinas.append(maquinas_cadastradas[maquinas]) 
 
-    with st.form("informar ultima manutencao", clear_on_submit=True):
+    with st.form("informar ultima manutencao", clear_on_submit=False):
         c1,c2 = st.columns(2)
-
+        
         with c1:
             codigo_maquina = st.selectbox("ID da máquina", lista_maquinas)
             ultima_manutencao = st.date_input("Data da última manutenção")
-            pessoa = st.selectbox("Pessoa", ['Selecione','Luan', 'Luan'])
-        with c2:    
-            hr_inicio = st.time_input("Hora de ínicio")
-            hr_fim = st.time_input("Hora de finalização")
+        with c2:   
+            pessoa = st.multiselect("Pessoa(s)", ['4347 - Leandro', '4363 - Davi', '4147 - Ryan', '3864 - Ivanildo', '4256 - Augusto'])
+            pessoa = ','.join(pessoa)
+            tempo_manutencao = st.number_input('Tempo da manutenção em minutos',format="%.i", min_value=0, max_value=2000)
 
         observacao = st.text_area("Observação")
         
@@ -512,14 +571,14 @@ def page2():
                 
         if submitted:
 
-            if codigo_maquina != 'Selecione' and pessoa != 'Selecione':
-            
-                tempo_manutencao = minutos(hr_inicio, hr_fim)
+            if codigo_maquina != 'Selecione' and pessoa != '' and tempo_manutencao != 0:
+                
+                codigo_maquina = codigos_descricao[codigos_descricao['codigo_descricao'] == codigo_maquina].reset_index(drop=True)['Código da máquina'][0]
 
                 filtrar_maquina = table[table['Código da máquina'] == codigo_maquina].reset_index()
                 filtrar_maquina = filtrar_maquina[['index','Setor',
-                                                   'Código da máquina','Descrição da máquina',
-                                                   'Classificação','Periodicidade','Última Manutenção']]
+                                                'Código da máquina','Descrição da máquina',
+                                                'Classificação','Periodicidade','Última Manutenção']]
                 
                 index_planilha = filtrar_maquina['index'][0]
 
@@ -528,8 +587,6 @@ def page2():
                 periodicidade=filtrar_maquina['Periodicidade'][0]
                 maquina=filtrar_maquina['Descrição da máquina'][0]
                 
-                filtrar_maquina['Hora de início'] = str(hr_inicio)
-                filtrar_maquina['Hora de fim'] = str(hr_fim)
                 filtrar_maquina['Comentário'] = observacao
                 filtrar_maquina['Pessoa'] = pessoa
                 filtrar_maquina['Tempo de manutenção'] = tempo_manutencao
@@ -540,9 +597,9 @@ def page2():
                 wks.update("A" + str(index_planilha + 2), maquina_lista) 
 
                 filtrar_maquina = filtrar_maquina[['Setor','Código da máquina',
-                                                   'Descrição da máquina','Classificação',
-                                                   'Periodicidade','Última Manutenção','Pessoa',
-                                                   'Comentário','Hora de início', 'Hora de fim', 'Tempo de manutenção']].values.tolist()
+                                                'Descrição da máquina','Classificação',
+                                                'Periodicidade','Última Manutenção','Pessoa',
+                                                'Comentário', 'Tempo de manutenção']].values.tolist()
                 
                 sh.values_append('bd_historico_manutencao', {'valueInputOption': 'RAW'}, {'values': filtrar_maquina})
 
@@ -551,23 +608,29 @@ def page2():
             else:
                 st.warning("Preencha todos os campos", icon='⚠️')
 
-def page3():
+def page3(): # script para agendar as manutencoes
     
     table, wks, sh, table2, table3 = exibir()
 
     data = date.today().strftime(format="%d/%m/%Y")
-    data = pd.to_datetime(data, format="%d/%m/%Y") # data de hoje (segunda-feira)
+    data = pd.to_datetime(data, format="%d/%m/%Y") + timedelta(3) # rodar na sexta porém com data segunda-feira
     
     lista_indices = []
+    lista_colunas = []
 
     for i in range(1,7):
         indices = []
+        colunas = []
         for coluna in table.columns:
             data_str = data.strftime(format='%d-%m-%Y')
             idx = table.index[table[coluna] == data_str].tolist()
             indices.extend([(i) for i in idx])
+            colunas.extend([(i,coluna) for i in idx])
 
-        lista_indices.append(indices)        
+        lista_indices.append(indices)
+        lista_colunas.append(colunas)
+        semana = lista_colunas[0][0][0]
+
         data = data + timedelta(1)
     
     maquinas_merge = pd.DataFrame()
@@ -584,7 +647,7 @@ def page3():
 
             media_tempos = table3[['Código da máquina','Criticidade','tempo de manutencao']]
             media_tempos = pd.DataFrame(media_tempos.groupby(['Código da máquina','Criticidade']).mean()).reset_index()
-            media_tempos['Data real'] = data - timedelta(i)
+            media_tempos['Data real'] = semana
             i = i-1
             
             maquinas = maquinas.merge(media_tempos)
@@ -593,7 +656,7 @@ def page3():
 
         else:
             pass
-        
+
     # Criando as listas de equipamentos e tempos
 
     equipamentos = maquinas_merge['Código da máquina'].values.tolist()
@@ -603,10 +666,10 @@ def page3():
     df_planejamento['Dia'] = ''
 
     data = date.today().strftime(format="%d/%m/%Y")
-    data = pd.to_datetime(data, format="%d/%m/%Y") # data de hoje (segunda-feira)
+    data = pd.to_datetime(data, format="%d/%m/%Y") + timedelta(3) # data de hoje (segunda-feira)
     
     # Criando a variável de tempo máximo
-    tempo_maximo = 540
+    tempo_maximo = 180
 
     # Criando o laço de repetição
     for i in range(len(equipamentos)):
@@ -617,8 +680,8 @@ def page3():
 
         else:
             # Incrementando o dia atual
-            data = data + timedelta(1)
-            tempo_maximo = 540 - tempos[i]
+            data = data + 1 * BDay()
+            tempo_maximo = 180 - tempos[i]
 
         df_planejamento['Dia'][i] = data
     
@@ -628,8 +691,8 @@ def page3():
     df_planejamento['Dia'] = pd.to_datetime(df_planejamento['Dia'])
     df_planejamento['Dia'] = df_planejamento['Dia'].dt.strftime("%d/%m/%Y")
 
-    df_planejamento['Data real'] = pd.to_datetime(df_planejamento['Data real'])
-    df_planejamento['Data real'] = df_planejamento['Data real'].dt.strftime("%d/%m/%Y")
+    df_planejamento['Data real'] = semana
+    df_planejamento['Data real'] = semana
 
     table = table[['Código da máquina', 'Descrição da máquina', 'Setor']]
     df_planejamento = df_planejamento.merge(table)
@@ -638,9 +701,14 @@ def page3():
 
     salvar_agendamento(df_planejamento)
 
+def page4(): # criar testes
+    opcoes = ['Opção 1', 'Opção 2', 'Opção 3']
+    selecionados = st.multiselect('Selecione as opções', opcoes, help='Selecione as opções que deseja visualizar.', max_selections=1)
+
 page_names_to_funcs = {
     "Cadastrar": page1,
     "Informar manutenção": page2,
+    "testes": page4,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())

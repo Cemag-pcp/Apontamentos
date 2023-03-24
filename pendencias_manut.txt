@@ -1,0 +1,9 @@
+alterações e incrementos:
+
+- tempo de slot por dia (3 horas = 180 minutos) - ok 
+- média das 3 últimas manutenções
+- rodar script para toda sexta - ok
+- periodicidade (semestral, anual, etc) - ok
+- adicionar a descrição ao lado do código do equipamento no listbox da pagina "Informar manutenções" - ok
+- add nome e matrícula das pessoas que podem fazer a manutenções - ok
+- add coluna com numero da semana - ok
