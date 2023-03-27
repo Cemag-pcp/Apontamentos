@@ -182,11 +182,14 @@ def page1():
 
             filter_new['UNICO'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
             filter_new['UNICO'] = filter_new['UNICO'].replace("/",'',regex=True)
-
-            for tipo in range(filter_new):
-                if filter_new['TIPO'][tipo] == '':
-                    filter_new['TIPO'][tipo] = 'PO'
             
+            try:
+                for tipo in range(filter_new):
+                    if filter_new['TIPO'][tipo] == '':
+                        filter_new['TIPO'][tipo] = 'PO'
+            except:
+                pass
+
             filter_new = filter_new.values.tolist()
             sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
 
