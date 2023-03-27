@@ -694,7 +694,7 @@ def page2(): # informar manutencao
                 
         if submitted:
 
-            if codigo_maquina != 'Selecione' and pessoa != '' and tempo_manutencao != 0:
+            if codigo_maquina != 'Selecione' and pessoa != '' and tempo_manutencao != 0 and n_manutencao != 0:
                 
                 codigo_maquina = codigos_descricao[codigos_descricao['codigo_descricao'] == codigo_maquina].reset_index(drop=True)['Código da máquina'][0]
 
