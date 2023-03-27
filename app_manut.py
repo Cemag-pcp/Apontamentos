@@ -707,4 +707,8 @@ page_names_to_funcs = {
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
+
+with st.sidebar:
+    st.write('https://docs.google.com/spreadsheets/d/1omsYVEAcN2SsIDGyJTiavMPoTomMcCI6uMKZ9Kset9o/edit#gid=0')
+
 page_names_to_funcs[selected_page]()
