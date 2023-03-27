@@ -675,7 +675,7 @@ def page2(): # informar manutencao
         lista_maquinas.append(maquinas_cadastradas[maquinas]) 
 
     with st.form("informar ultima manutencao", clear_on_submit=False):
-        c1,c2,c6 = st.columns(3)
+        c1,c2 = st.columns(2)
         
         with c1:
             codigo_maquina = st.selectbox("ID da máquina", lista_maquinas)
@@ -685,8 +685,8 @@ def page2(): # informar manutencao
             qt_pessoas = len(pessoa)
             pessoa = ','.join(pessoa)
             tempo_manutencao = st.number_input('Tempo da manutenção em minutos',format="%.i", min_value=0, max_value=2000)
-        with c6:
-            n_manutencao = st.number_input('Qual o número dessa manutenção?',format="%.i", min_value=0, max_value=2000)
+        # with c6:
+        #     n_manutencao = st.number_input('Qual o número dessa manutenção?',format="%.i", min_value=0, max_value=2000)
         
         observacao = st.text_area("Observação")
         
@@ -694,7 +694,7 @@ def page2(): # informar manutencao
                 
         if submitted:
 
-            if codigo_maquina != 'Selecione' and pessoa != '' and tempo_manutencao != 0 and n_manutencao != 0:
+            if codigo_maquina != 'Selecione' and pessoa != '' and tempo_manutencao != 0:
                 
                 codigo_maquina = codigos_descricao[codigos_descricao['codigo_descricao'] == codigo_maquina].reset_index(drop=True)['Código da máquina'][0]
 
@@ -715,7 +715,6 @@ def page2(): # informar manutencao
                 filtrar_maquina['Tempo de manutenção'] = tempo_manutencao
                 filtrar_maquina['Quantidade de pessoas'] = qt_pessoas
                 filtrar_maquina['HH'] = filtrar_maquina['Tempo de manutenção'] / filtrar_maquina['Quantidade de pessoas']
-                filtrar_maquina['numero da manutencao'] = n_manutencao
 
                 manutencao_gerada = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
 
@@ -726,7 +725,7 @@ def page2(): # informar manutencao
                                                 'Descrição da máquina','Classificação',
                                                 'Periodicidade','Última Manutenção','Pessoa',
                                                 'Comentário', 'Tempo de manutenção', 'Quantidade de pessoas',
-                                                'HH', 'numero da manutencao']].values.tolist()
+                                                'HH']].values.tolist()
                 
                 sh.values_append('bd_historico_manutencao', {'valueInputOption': 'RAW'}, {'values': filtrar_maquina})
 
