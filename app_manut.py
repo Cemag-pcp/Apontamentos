@@ -557,6 +557,7 @@ def page2(): # informar manutencao
             ultima_manutencao = st.date_input("Data da última manutenção")
         with c2:   
             pessoa = st.multiselect("Pessoa(s)", ['4347 - Leandro', '4363 - Davi', '4147 - Ryan', '3864 - Ivanildo', '4256 - Augusto'])
+            qt_pessoas = len(pessoa)
             pessoa = ','.join(pessoa)
             tempo_manutencao = st.number_input('Tempo da manutenção em minutos',format="%.i", min_value=0, max_value=2000)
 
@@ -585,6 +586,8 @@ def page2(): # informar manutencao
                 filtrar_maquina['Comentário'] = observacao
                 filtrar_maquina['Pessoa'] = pessoa
                 filtrar_maquina['Tempo de manutenção'] = tempo_manutencao
+                filtrar_maquina['Quantidade de pessoas'] = qt_pessoas
+                filtrar_maquina['HH'] = filtrar_maquina['Tempo de manutenção'] / filtrar_maquina['Quantidade de pessoas']
 
                 manutencao_gerada = gerador_de_semanas(grupo,codigo_maquina,maquina,classificacao,ultima_manutencao,periodicidade)
 
@@ -594,7 +597,7 @@ def page2(): # informar manutencao
                 filtrar_maquina = filtrar_maquina[['Setor','Código da máquina',
                                                 'Descrição da máquina','Classificação',
                                                 'Periodicidade','Última Manutenção','Pessoa',
-                                                'Comentário', 'Tempo de manutenção']].values.tolist()
+                                                'Comentário', 'Tempo de manutenção', 'Quantidade de pessoas', 'HH']].values.tolist()
                 
                 sh.values_append('bd_historico_manutencao', {'valueInputOption': 'RAW'}, {'values': filtrar_maquina})
 
