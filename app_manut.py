@@ -431,7 +431,7 @@ def minutos(hora_inicio, hora_fim):
 
 def page1(): # cadastro de peças
 
-    st.markdown("<h1 style='text-align: center; font-size:40px; color: White'>Cadastro de equipamentos</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-size:40px; color: Black'>Cadastro de equipamentos</h1>", unsafe_allow_html=True)
     st.markdown("<h1          </h1>", unsafe_allow_html=True)
 
     tab1, tab2 = st.tabs(["Cadastrar equipamento", "Importar arquivo"])
@@ -509,7 +509,7 @@ def page1(): # cadastro de peças
     
 def page2(): # informar manutencao
     
-    st.markdown("<h1 style='text-align: center; font-size:40px; color: White'>Última manutenção</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-size:40px; color: Black'>Última manutenção</h1>", unsafe_allow_html=True)
     st.markdown("<h1          </h1>", unsafe_allow_html=True)
 
     table,wks,sh,table2, table3 = exibir()
