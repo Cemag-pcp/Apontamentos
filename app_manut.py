@@ -2,11 +2,15 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import streamlit as st
+
 from gspread_formatting import *
+
 from datetime import datetime, date
 from datetime import timedelta
 import datetime
+
 import numpy as np
+
 from pandas.tseries.offsets import BDay
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder

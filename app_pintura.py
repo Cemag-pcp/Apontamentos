@@ -1,14 +1,15 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
 import pandas as pd
+
 import streamlit as st
-from gspread_formatting import *
 from st_aggrid import AgGrid, JsCode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
-import time
+from gspread_formatting import *
+
 from PIL import Image
 from datetime import datetime, date
-from datetime import timedelta
 import datetime
 import numpy as np
 
@@ -54,6 +55,8 @@ def load_datas():
 def page1():
     
     wks1, sh1, table, table1 = load_datas()
+
+    ultimo_id = table1['id'].max() + 1
 
     n_op = st.date_input("Data da carga")
     n_op = n_op.strftime("%d/%m/%Y")
