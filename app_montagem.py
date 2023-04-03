@@ -1,5 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
 import pandas as pd
 import streamlit as st
 from gspread_formatting import *
@@ -25,6 +26,7 @@ st.image(image, width=300)
 #st.write(datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
 
 #@st.cache(allow_output_mutation=True)
+
 def load_datas():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -33,7 +35,7 @@ def load_datas():
     credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
     client = gspread.authorize(credentials)
     sa = gspread.service_account('service_account.json')    
-
+    
     name_sheet = 'Base gerador de ordem de producao'
     worksheet = 'Montagem'
     sh = sa.open(name_sheet)

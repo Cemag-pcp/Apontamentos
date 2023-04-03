@@ -1,14 +1,15 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
 import pandas as pd
+
 import streamlit as st
-from gspread_formatting import *
 from st_aggrid import AgGrid, JsCode
 from st_aggrid.grid_options_builder import GridOptionsBuilder
-import time
+from gspread_formatting import *
+
 from PIL import Image
 from datetime import datetime, date
-from datetime import timedelta
 import datetime
 import numpy as np
 
@@ -22,9 +23,7 @@ st.markdown("<h1 style='text-align: center; font-size:60px; color: Black'>Aponta
 with st.sidebar:
     image = Image.open('logo-cemagL.png')
     st.image(image, width=300)
-#st.write(datetime.datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
 
-#@st.cache(allow_output_mutation=True)
 def load_datas():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -54,6 +53,8 @@ def load_datas():
 def page1():
     
     wks1, sh1, table, table1 = load_datas()
+
+    ultimo_id = table1['id'].max() + 1
 
     n_op = st.date_input("Data da carga")
     n_op = n_op.strftime("%d/%m/%Y")
@@ -279,3 +280,7 @@ page_names_to_funcs = {
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
 page_names_to_funcs[selected_page]() 
+
+
+
+load_datas()
