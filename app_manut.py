@@ -795,7 +795,7 @@ def page3(): # script para agendar as manutencoes
     table, wks, sh, table2, table3 = exibir()
 
     data = date.today().strftime(format="%d/%m/%Y")
-    data = pd.to_datetime(data, format="%d/%m/%Y") + timedelta(3) # rodar na sexta porém com data segunda-feira
+    data = pd.to_datetime(data, format="%d/%m/%Y") #+ timedelta(3) # rodar na sexta porém com data segunda-feira
     
     lista_indices = []
     lista_colunas = []
@@ -806,12 +806,14 @@ def page3(): # script para agendar as manutencoes
         for coluna in table.columns:
             data_str = data.strftime(format='%d-%m-%Y')
             idx = table.index[table[coluna] == data_str].tolist()
+            if len(idx) > 0:
+                 semana = coluna
             indices.extend([(i) for i in idx])
-            colunas.extend([(i,coluna) for i in idx])
+            #colunas.extend([(i,coluna) for i in idx])
 
         lista_indices.append(indices)
-        lista_colunas.append(colunas)
-        semana = lista_colunas[0][0][0]
+        #lista_colunas.append(colunas)
+        #semana = lista_colunas[1][1][1]
 
         data = data + timedelta(1)
     
@@ -848,7 +850,7 @@ def page3(): # script para agendar as manutencoes
     df_planejamento['Dia'] = ''
 
     data = date.today().strftime(format="%d/%m/%Y")
-    data = pd.to_datetime(data, format="%d/%m/%Y") + timedelta(3) # data de hoje (segunda-feira)
+    data = pd.to_datetime(data, format="%d/%m/%Y")# + timedelta(3) # data de hoje (segunda-feira)
     
     # Criando a variável de tempo máximo
     tempo_maximo = 180
