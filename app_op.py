@@ -375,10 +375,12 @@ def page3():
     table = pd.DataFrame(list1)
     table = table.set_axis(headers, axis=1, inplace=False)[1:]
 
+    opcoes_espessura = table[table['espessura1'] != '']
+
     comp = str(st.number_input("Comprimento:", max_value=4050))
     larg = str(st.number_input("Largura:", max_value=1550))
     #espessura = st.text_input("Espessura:")
-    espessura = st.selectbox('Espessura',(list(table['espessura1'])))
+    espessura = st.selectbox('Espessura',(list(opcoes_espessura)))
     
     tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
     
