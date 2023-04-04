@@ -13,18 +13,35 @@ from datetime import datetime, date
 import datetime
 import numpy as np
 
-#Base gerador de ordem de producao
-
-# Connect to Google Sheets
-# ======================================= #
-
-st.markdown("<h1 style='text-align: center; font-size:60px; color: Black'>Apontamento de produção Pintura</h1>", unsafe_allow_html=True)
-
-with st.sidebar:
-    image = Image.open('logo-cemagL.png')
-    st.image(image, width=300)
-
+@st.cache(allow_output_mutation=True)
 def load_datas():
+
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+             "https://www.googleapis.com/auth/drive"]
+    
+    credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+    client = gspread.authorize(credentials)
+    sa = gspread.service_account('service_account.json')    
+
+    name_sheet = 'Base gerador de ordem de producao'
+    worksheet = 'Pintura'
+    sh = sa.open(name_sheet)
+    wks = sh.worksheet(worksheet)
+    list1 = wks.get_all_records()
+    table = pd.DataFrame(list1)
+    table = table.drop_duplicates()
+        
+    name_sheet1 = 'Base ordens de produçao finalizada'
+    worksheet1 = 'Pintura'
+    sh1 = sa.open(name_sheet1)
+    wks1 = sh1.worksheet(worksheet1)
+    list2 = wks1.get_all_records()
+    table1 = pd.DataFrame(list2)
+    
+    return wks1, sh1,table, table1#, lista_unicos
+
+#@st.cache(allow_output_mutation=True)
+def load_datas1():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
              "https://www.googleapis.com/auth/drive"]
@@ -140,7 +157,7 @@ def page1():
                                 data_return_mode='AS_INPUT',
                                 #custom_css=custom_css,
                                 width='100%',
-                                update_mode='MANUAL',
+                                #update_mode='MANUAL',
                                 height=500,
                                 fit_columns_on_grid_load = True,
                                 enable_enterprise_modules=True,
@@ -199,7 +216,7 @@ def page1():
 
 def page2():
     
-    wks1, sh1,table, table1 = load_datas()
+    wks1, sh1,table, table1 = load_datas1()
 
     n_op = st.date_input("Data da carga")
     n_op = n_op.strftime("%d/%m/%Y")
@@ -226,7 +243,7 @@ def page2():
                                 gridOptions=grid_options,
                                 data_return_mode='AS_INPUT',
                                 width='100%',
-                                update_mode='MANUAL',
+                                #update_mode='MANUAL',
                                 height=500,
                                 try_to_convert_back_to_original_types = False,
                                 fit_columns_on_grid_load = True,
@@ -269,7 +286,6 @@ def page2():
 
                 wks1.update("L" + str(mudanca_status+2), 'OK')
 
-
     if n_op != '':
         consultar_2(wks1, n_op,sh1,table1)
 
@@ -280,7 +296,3 @@ page_names_to_funcs = {
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
 page_names_to_funcs[selected_page]() 
-
-
-
-load_datas()
