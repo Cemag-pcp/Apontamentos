@@ -290,38 +290,42 @@ def page2():
 
         filter_new = grid_response['data']
 
-        button2 = st.button('Salvar')
+        return filter_new,table1,wks1
+    
+    def salvar(filter_new,table1,wks1):  
+                    
+        filter_new['COR'] = ''
+        filter_new['QT PLAN.'] = ''
+        filter_new['COR'] = ''
+        filter_new['SETOR'] = 'Pintura'
+        filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
+        
+        filter_new['FLAG'] = '' 
 
-        if button2:
-            
-            filter_new['COR'] = ''
-            filter_new['QT PLAN.'] = ''
-            filter_new['COR'] = ''
-            filter_new['SETOR'] = 'Pintura'
-            filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
-            
-            filter_new['FLAG'] = '' 
+        filter_new = filter_new[['FLAG','CODIGO', 'PEÇA','QT PLAN.','COR','PROD.','CAMBÃO','TIPO','DT. CARGA','DATA FINALIZADA','SETOR','STATUS','id']]#, 'FLAG','SETOR']]
 
-            filter_new = filter_new[['FLAG','CODIGO', 'PEÇA','QT PLAN.','COR','PROD.','CAMBÃO','TIPO','DT. CARGA','DATA FINALIZADA','SETOR','STATUS','id']]#, 'FLAG','SETOR']]
+        filter_new['CAMBÃO'] = filter_new['CAMBÃO'].astype(str)
 
-            filter_new['CAMBÃO'] = filter_new['CAMBÃO'].astype(str)
+        # filter_new['FLAG'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
+        # filter_new['FLAG'] = filter_new['FLAG'].replace('/','', regex=True)
 
-            # filter_new['FLAG'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
-            # filter_new['FLAG'] = filter_new['FLAG'].replace('/','', regex=True)
+        filter_new = filter_new.loc[(filter_new['STATUS'] != '')]
 
-            filter_new = filter_new.loc[(filter_new['STATUS'] != '')]
-
-            table1 = table1.loc[(table1['STATUS'] == '')]
-            
-            lista_ids = filter_new['id'].values.tolist()
-            
-            mudanca_status = table1[table1['id'].isin(lista_ids)]
-            
-            for id in range(len(lista_ids)):
-                wks1.update("L" + str(mudanca_status.index[id] + 2), 'OK')
+        table1 = table1.loc[(table1['STATUS'] == '')]
+        
+        lista_ids = filter_new['id'].values.tolist()
+        
+        mudanca_status = table1[table1['id'].isin(lista_ids)]
+        
+        for id in range(len(lista_ids)):
+            wks1.update("L" + str(mudanca_status.index[id] + 2), 'OK')
 
     if n_op != '':
-        consultar_2(wks1, n_op,sh1,table1)
+        #time.sleep(1.5)
+        filter_new,table1,wks1 = consultar_2(wks1, n_op,sh1,table1)
+
+    if st.button('Salvar'):
+        salvar(filter_new,table1,wks1)
 
 page_names_to_funcs = {
     "Gerar Cambão": page1,
