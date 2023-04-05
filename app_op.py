@@ -20,6 +20,31 @@ sa = gspread.service_account('service_account.json')
 
 # ======================================= #
 
+import base64
+
+@st.cache(allow_output_mutation=True)
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def set_png_as_page_bg(png_file):
+    bin_str = get_base64_of_bin_file(png_file) 
+    page_bg_img = '''
+    <style>
+    .stApp {
+    background-image: url("data:image/png;base64,%s");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-attachment: scroll; # doesn't work
+    }
+    </style>
+    ''' % bin_str
+    st.markdown(page_bg_img, unsafe_allow_html=True)
+    return
+
+set_png_as_page_bg('cemag_papel.png')
+
 # Título do app 
 
 st.markdown("<h1 style='text-align: center; font-size:80px; color: black'>Gerenciador de OP</h1>", unsafe_allow_html=True)
@@ -129,10 +154,10 @@ def page1():
             else:
                 st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já estava aberta!</h2>", unsafe_allow_html=True)
 
-
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Plasma</h2>", unsafe_allow_html=True)
     
-    uploaded_file = st.file_uploader("Choose a XLS file", type="xls")
+    st.markdown("<h3 style='text-align: left; font-size:30px; color: black'>Escolha um arquivo</h3>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("", type="xls")
     
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
@@ -375,7 +400,19 @@ def page3():
     table = pd.DataFrame(list1)
     table = table.set_axis(headers, axis=1, inplace=False)[1:]
 
-    opcoes_espessura = table[table['espessura1'] != '']
+    opcoes_espessura = table[['espessura1']]
+    opcoes_espessura = opcoes_espessura[opcoes_espessura['espessura1'] != '']
+
+    tabs_font_css = """
+    <style>
+    div[class*="stNumberInput"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
 
     comp = str(st.number_input("Comprimento:", max_value=4050))
     larg = str(st.number_input("Largura:", max_value=1550))
@@ -384,7 +421,8 @@ def page3():
     
     tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
     
-    uploaded_file = st.file_uploader("Choose a XLS file", type="xlsx")
+    st.markdown("<h3 style='text-align: left; font-size:30px; color: black'>Escolha um arquivo</h3>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("", type="xlsx")
 
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
