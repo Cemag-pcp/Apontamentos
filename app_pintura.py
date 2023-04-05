@@ -23,7 +23,6 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-
 def set_png_as_page_bg(png_file):
     bin_str = get_base64_of_bin_file(png_file) 
     page_bg_img = '''
@@ -38,7 +37,6 @@ def set_png_as_page_bg(png_file):
     ''' % bin_str
     st.markdown(page_bg_img, unsafe_allow_html=True)
     return
-
 
 set_png_as_page_bg('cemag_papel.png')
 
@@ -243,6 +241,7 @@ def page1():
 
             filter_new = filter_new.values.tolist()
             sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
+        
 
     if n_op != '':
         consultar(n_op,table)
