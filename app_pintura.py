@@ -21,20 +21,6 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-# def set_png_as_page_bg(png_file):
-#     bin_str = get_base64_of_bin_file(png_file)
-#     page_bg_img = '''
-#     <style>
-#     .stApp {
-#     background-image: url("data:image/png;base64,%s");
-#     background-size: cover;
-#     }
-#     </style>
-#     ''' % bin_str
-    
-#     st.markdown(page_bg_img, unsafe_allow_html=True)
-#     return
-
 
 def set_png_as_page_bg(png_file):
     bin_str = get_base64_of_bin_file(png_file) 
@@ -241,8 +227,10 @@ def page1():
 
             filter_new['UNICO'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
             filter_new['UNICO'] = filter_new['UNICO'].replace("/",'',regex=True)
-            
-            #filter_new['PROD.'] = filter_new['PROD.'].astype(int)
+          
+            filter_new['PROD.'] = filter_new['PROD.'].astype(int)
+            filter_new['PLAN.'] = filter_new['PLAN.'].astype(int)
+            filter_new['CAMBÃO'] = filter_new['CAMBÃO'].astype(int)
 
             try:
                 for tipo in range(filter_new):
@@ -270,12 +258,14 @@ def page2():
                         
         filter_ = filter_.reset_index(drop=True)
         
-        filter_ = filter_.loc[(filter_['STATUS'] != 'OK')]
+        filter_ = filter_.loc[(filter_['STATUS'] == '')]
 
         filter_ = filter_.rename(columns={'QT APONT.':'PROD.','DATA DA CARGA':'DT. CARGA'})
 
-        table_geral = filter_[['CODIGO', 'PEÇA', 'CAMBÃO', 'TIPO', 'PROD.','DT. CARGA','STATUS']]#, 'FLAG','SETOR']]
+        table_geral = filter_[['id','CODIGO', 'PEÇA', 'CAMBÃO', 'TIPO', 'PROD.','DT. CARGA','STATUS']]#, 'FLAG','SETOR']]
 
+        #coluna_id = filter_[['id']]
+        
         gb = GridOptionsBuilder.from_dataframe(table_geral)
         gb.configure_default_column(min_column_width=100)
         gb.configure_column('STATUS', editable=True)
@@ -309,25 +299,23 @@ def page2():
             
             filter_new['FLAG'] = '' 
 
-            filter_new = filter_new[['FLAG','CODIGO', 'PEÇA','QT PLAN.','COR','PROD.','CAMBÃO','TIPO','DT. CARGA','DATA FINALIZADA','SETOR','STATUS']]#, 'FLAG','SETOR']]
+            filter_new = filter_new[['FLAG','CODIGO', 'PEÇA','QT PLAN.','COR','PROD.','CAMBÃO','TIPO','DT. CARGA','DATA FINALIZADA','SETOR','STATUS','id']]#, 'FLAG','SETOR']]
 
             filter_new['CAMBÃO'] = filter_new['CAMBÃO'].astype(str)
 
-            filter_new['FLAG'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
-            filter_new['FLAG'] = filter_new['FLAG'].replace('/','', regex=True)
+            # filter_new['FLAG'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
+            # filter_new['FLAG'] = filter_new['FLAG'].replace('/','', regex=True)
 
             filter_new = filter_new.loc[(filter_new['STATUS'] != '')]
 
-            lista_flags = filter_new[['FLAG']].values.tolist()
-            
             table1 = table1.loc[(table1['STATUS'] == '')]
-
-            for flags in range(len(lista_flags)):
-
-                mudanca_status = table1.loc[(table1['FLAG']) == lista_flags[flags][0]]
-                mudanca_status = mudanca_status.index[0] 
-
-                wks1.update("L" + str(mudanca_status+2), 'OK')
+            
+            lista_ids = filter_new['id'].values.tolist()
+            
+            mudanca_status = table1[table1['id'].isin(lista_ids)]
+            
+            for id in range(len(lista_ids)):
+                wks1.update("L" + str(mudanca_status.index[id] + 2), 'OK')
 
     if n_op != '':
         consultar_2(wks1, n_op,sh1,table1)

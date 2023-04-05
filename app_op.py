@@ -34,9 +34,8 @@ def set_png_as_page_bg(png_file):
     <style>
     .stApp {
     background-image: url("data:image/png;base64,%s");
-    background-size: contain;
     background-repeat: no-repeat;
-    background-attachment: scroll; # doesn't work
+    ackground-attachment: scroll; # doesn't work
     }
     </style>
     ''' % bin_str
@@ -156,8 +155,18 @@ def page1():
 
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Plasma</h2>", unsafe_allow_html=True)
     
-    st.markdown("<h3 style='text-align: left; font-size:30px; color: black'>Escolha um arquivo</h3>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type="xls")
+    tabs_font_css = """
+    <style>
+    div[class*="element-container css-1hynsf2 e1tzin5v3"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader("Escolha um arquivo", type="xls")
     
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
@@ -401,11 +410,24 @@ def page3():
     table = table.set_axis(headers, axis=1, inplace=False)[1:]
 
     opcoes_espessura = table[['espessura1']]
-    opcoes_espessura = opcoes_espessura[opcoes_espessura['espessura1'] != '']
+    opcoes_espessura = opcoes_espessura[opcoes_espessura['espessura1'] != ''].values.tolist()
+    
+    opcoes_espessura_list = []
+
+    for i in range(len(opcoes_espessura)):
+        opcoes_espessura_list.append(opcoes_espessura[i][0])
 
     tabs_font_css = """
     <style>
     div[class*="stNumberInput"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    div[class*="row-widget stSelectbox"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    div[class*="element-container css-1hynsf2 e1tzin5v3"] label p {
     font-size: 26px;
     color: black;
     }
@@ -417,12 +439,11 @@ def page3():
     comp = str(st.number_input("Comprimento:", max_value=4050))
     larg = str(st.number_input("Largura:", max_value=1550))
     #espessura = st.text_input("Espessura:")
-    espessura = st.selectbox('Espessura',(list(opcoes_espessura)))
+    espessura = st.selectbox('Espessura',opcoes_espessura_list)
     
     tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
     
-    st.markdown("<h3 style='text-align: left; font-size:30px; color: black'>Escolha um arquivo</h3>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type="xlsx")
+    uploaded_file = st.file_uploader("Escolha um arquivo", type="xlsx")
 
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
