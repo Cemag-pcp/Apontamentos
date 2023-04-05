@@ -10,6 +10,8 @@ from gspread_formatting import *
 
 from PIL import Image
 from datetime import datetime, date
+
+import time
 import datetime
 import numpy as np
 
@@ -247,6 +249,7 @@ def page1():
 
 def page2():
     
+    time.sleep(1.5)
     wks1, sh1,table, table1 = load_datas1()
 
     n_op = st.date_input("Data da carga")
