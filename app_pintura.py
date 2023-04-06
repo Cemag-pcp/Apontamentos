@@ -115,10 +115,10 @@ def page1():
     n_op = n_op.strftime("%d/%m/%Y")
 
     def consultar(n_op,table):
-        
+
         filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
         
-        filter_ = filter_.drop_duplicates(['CODIGO'])
+        filter_ = filter_.drop_duplicates(subset=['CODIGO'])
 
         filter_['PROD.'] = ''
                 
