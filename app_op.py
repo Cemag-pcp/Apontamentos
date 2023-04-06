@@ -311,6 +311,17 @@ def page2():
     
     n_op = 0
 
+    tabs_font_css = """
+    <style>
+    div[class*="row-widget stTextInput css-pb6fr7 edfmue0"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
+
     try:        
         n_op = st.text_input("Número da op:")
     except:
@@ -462,6 +473,17 @@ def page4():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Duplicador de OP</h2>", unsafe_allow_html=True)
 
+    tabs_font_css = """
+    <style>
+    div[class*="stTextInput"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
+
     peca = st.text_input("Peça:")
     
     if peca != '':
@@ -601,4 +623,4 @@ selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs
 page_names_to_funcs[selected_page]() 
 
 with st.sidebar:
-    st.write("<h1 style='text-align: center; font-size:12px; color: black'>Versão 12</h1>", unsafe_allow_html=True)
+    st.write("<h1 style='text-align: center; font-size:12px; color: black'>Versão 13</h1>", unsafe_allow_html=True)
