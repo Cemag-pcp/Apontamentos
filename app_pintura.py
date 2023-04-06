@@ -118,8 +118,6 @@ def page1():
 
         filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
         
-        filter_ = filter_.drop_duplicates(subset=['CODIGO'])
-        filter_
         filter_['PROD.'] = ''
                 
         filter_ = filter_.reset_index(drop=True)
