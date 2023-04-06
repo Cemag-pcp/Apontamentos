@@ -119,7 +119,7 @@ def page1():
         filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
         
         filter_ = filter_.drop_duplicates(subset=['CODIGO'])
-
+        filter_
         filter_['PROD.'] = ''
                 
         filter_ = filter_.reset_index(drop=True)
@@ -358,4 +358,4 @@ selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs
 page_names_to_funcs[selected_page]() 
 
 with st.sidebar:
-    st.write("<h1 style='text-align: center; font-size:10px; color: black'>Versão 15</h1>", unsafe_allow_html=True)
+    st.write("<h1 style='text-align: center; font-size:10px; color: black'>Versão 16</h1>", unsafe_allow_html=True)
