@@ -29,7 +29,6 @@ def set_png_as_page_bg(png_file):
     <style>
     .stApp {
     background-image: url("data:image/png;base64,%s");
-    background-size: contain;
     background-repeat: no-repeat;
     background-attachment: scroll; # doesn't work
     }
@@ -256,7 +255,6 @@ def page1():
         
     if n_op != '':
         consultar(n_op,table)
-
 
 def page2():
     
