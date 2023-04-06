@@ -40,7 +40,8 @@ def set_png_as_page_bg(png_file):
 
 set_png_as_page_bg('cemag_papel.png')
 
-@st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
+@st.experimental_singleton
 def load_datas():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -256,6 +257,7 @@ def page1():
     if n_op != '':
         consultar(n_op,table)
 
+
 def page2():
     
     time.sleep(1.5)
@@ -357,3 +359,9 @@ page_names_to_funcs[selected_page]()
 
 with st.sidebar:
     st.write("<h1 style='text-align: center; font-size:10px; color: black'>Versão 16</h1>", unsafe_allow_html=True)
+    
+    if st.button("Atualizar"):
+    # Clears all singleton caches:
+        st.experimental_singleton.clear()
+    else:
+        pass
