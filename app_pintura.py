@@ -115,9 +115,11 @@ def page1():
     n_op = n_op.strftime("%d/%m/%Y")
 
     def consultar(n_op,table):
-            
+        
         filter_ = table.loc[(table['DATA DA CARGA'] == n_op)]        
         
+        filter_ = filter_.drop_duplicates(['CODIGO'])
+
         filter_['PROD.'] = ''
                 
         filter_ = filter_.reset_index(drop=True)
@@ -253,7 +255,6 @@ def page1():
             filter_new = filter_new.values.tolist()
             sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
         
-
     if n_op != '':
         consultar(n_op,table)
 
