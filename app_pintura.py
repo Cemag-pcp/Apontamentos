@@ -100,6 +100,17 @@ def page1():
 
     ultimo_id = table1['id'].max() + 1
 
+    tabs_font_css = """
+    <style>
+    div[class*="stDateInput"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
+
     n_op = st.date_input("Data da carga")
     n_op = n_op.strftime("%d/%m/%Y")
 
@@ -250,6 +261,17 @@ def page2():
     
     time.sleep(1.5)
     wks1, sh1,table, table1 = load_datas1()
+
+    tabs_font_css = """
+    <style>
+    div[class*="stDateInput"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
 
     n_op = st.date_input("Data da carga")
     n_op = n_op.strftime("%d/%m/%Y")
