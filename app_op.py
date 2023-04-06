@@ -599,3 +599,6 @@ page_names_to_funcs = {
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
 page_names_to_funcs[selected_page]() 
+
+with st.sidebar:
+    st.write("<h1 style='text-align: center; font-size:12px; color: black'>Versão 12</h1>", unsafe_allow_html=True)
