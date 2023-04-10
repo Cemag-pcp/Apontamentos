@@ -34,7 +34,7 @@ def set_png_as_page_bg(png_file):
     <style>
     .stApp {
     background-image: url("data:image/png;base64,%s");
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     background-attachment: scroll; # doesn't work
     }
     </style>
