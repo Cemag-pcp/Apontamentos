@@ -583,7 +583,6 @@ def gerador_de_semanas_informar_manutencao(grupo,codigo_maquina,maquina,classifi
     
     return df_vazio
 
-
 def minutos(hora_inicio, hora_fim):
     
     hora_fim  = str(hora_fim)
