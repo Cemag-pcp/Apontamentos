@@ -1,3 +1,4 @@
+# Versao teste
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
@@ -8,6 +9,8 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from PIL import Image
 from datetime import date
 from datetime import datetime
+import sqlite3 
+import hashlib
 
 # Connect to Google Sheets
 
@@ -22,7 +25,7 @@ sa = gspread.service_account('service_account.json')
 
 import base64
 
-@st.cache(allow_output_mutation=True)
+@st.cache_resource
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -46,11 +49,37 @@ set_png_as_page_bg('cemag_papel.png')
 
 # Título do app 
 
-st.markdown("<h1 style='text-align: center; font-size:80px; color: black'>Gerenciador de OP</h1>", unsafe_allow_html=True)
-
 with st.sidebar:
     image = Image.open('logo-cemagL.png')
     st.image(image, width=300)
+
+def make_hashes(password):
+	return hashlib.sha256(str.encode(password)).hexdigest()
+
+def check_hashes(password,hashed_text):
+	if make_hashes(password) == hashed_text:
+		return hashed_text
+	return False
+conn = sqlite3.connect('data.db')
+c = conn.cursor()
+
+# DB  Functions
+def create_usertable():
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
+
+def add_userdata(username,password):
+	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+	conn.commit()
+
+def login_user(username,password):
+	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	data = c.fetchall()
+	return data
+
+def view_all_users():
+	c.execute('SELECT * FROM userstable')
+	data = c.fetchall()
+	return data
 
 # Contents of ~/my_app/streamlit_app.py
 
@@ -612,15 +641,52 @@ def page4():
             
             st.title('Número da nova op: ' + str(ult_op))
     
-page_names_to_funcs = {
-    "Criar OP - Plasma": page1,
-    "Criar OP - Laser": page3,
-    "Finalizar OP": page2,
-    "Duplicador de OP": page4,
-}
+# Página inicial, login e senha
+menu = ["Página inicial","Login","Crie uma conta nova"] 
+choice = st.sidebar.selectbox("Menu",menu)
 
-selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
-page_names_to_funcs[selected_page]() 
+# Colocar algo na página inicial ou login
+if choice == "Página inicial":
+    st.markdown('') # "<h1 style='text-align: center; font-size:60px;'>Página inicial</h1>", unsafe_allow_html=True
+    
+elif choice == "Login":
+    st.markdown('') #"<h1 style='text-align: center; font-size:60px;'>Login</h1>", unsafe_allow_html=True
 
-with st.sidebar:
-    st.write("<h1 style='text-align: center; font-size:12px; color: black'>Versão 13</h1>", unsafe_allow_html=True)
+    username = st.sidebar.text_input("Nome de usuário")
+    password = st.sidebar.text_input("Senha",type='password')
+    if st.sidebar.checkbox("Login"):
+        # if password == '12345':
+        create_usertable()
+        hashed_pswd = make_hashes(password)
+
+        result = login_user(username,check_hashes(password,hashed_pswd))
+    
+        if result:
+
+                # Título do app 
+
+                st.markdown("<h1 style='text-align: center; font-size:80px;'>Gerenciador de OP</h1>", unsafe_allow_html=True)
+
+                st.sidebar.success("Logado como {}".format(username))
+
+                page_names_to_funcs = {
+                    "Criar OP - Plasma": page1,
+                    "Criar OP - Laser": page3,
+                    "Finalizar OP": page2,
+                    "Duplicador de OP": page4,
+                }
+                selected_page = st.selectbox("Selecione a função", page_names_to_funcs.keys())
+                page_names_to_funcs[selected_page]() 
+        else:
+                st.sidebar.error("Nome de usuário/Senha incorreto")
+
+elif choice == "Crie uma conta nova":
+    st.markdown("<h1 style='color: black; font-size:30px;'>Crie uma conta nova</h1>", unsafe_allow_html=True)
+    new_user = st.text_input("Nome de usuário")
+    new_password = st.text_input("Password",type='password')
+
+    if st.button("Crie uma conta nova"):
+        create_usertable()
+        add_userdata(new_user,make_hashes(new_password))
+        st.success("Você criou com sucesso uma conta válida")
+        st.info("Vá para o menu Login para fazer o login")

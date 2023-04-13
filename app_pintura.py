@@ -16,8 +16,51 @@ import datetime
 import numpy as np
 
 import base64
+import hashlib # Security # passlib,hashlib,bcrypt,scrypt
+import sqlite3 # DB Management
 
-@st.cache(allow_output_mutation=True)
+def make_hashes(password):
+	return hashlib.sha256(str.encode(password)).hexdigest()
+
+def check_hashes(password,hashed_text):
+	if make_hashes(password) == hashed_text:
+		return hashed_text
+	return False
+
+# DB Management
+import sqlite3 
+conn = sqlite3.connect('data.db')
+c = conn.cursor()
+# DB  Functions
+def create_usertable():
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
+
+
+def add_userdata(username,password):
+	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+	conn.commit()
+
+def login_user(username,password):
+	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	data = c.fetchall()
+	return data
+
+
+def view_all_users():
+	c.execute('SELECT * FROM userstable')
+	data = c.fetchall()
+	return data
+
+#Base gerador de ordem de producao
+
+# Connect to Google Sheets
+# ======================================= #
+
+with st.sidebar:
+    image = Image.open('logo-cemagL.png')
+    st.image(image, width=300)
+
+@st.cache_resource #(allow_output_mutation=True)
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -40,7 +83,7 @@ def set_png_as_page_bg(png_file):
 set_png_as_page_bg('cemag_papel.png')
 
 #@st.cache(allow_output_mutation=True)
-@st.experimental_singleton
+#@st.experimental_singleton
 def load_datas():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -347,13 +390,53 @@ def page2():
     if st.button('Salvar'):
         salvar(filter_new,table1,wks1)
 
-page_names_to_funcs = {
-    "Gerar Cambão": page1,
-    "Finalizar Cambão": page2,
-}
+# Página inicial, login e senha
+menu = ["Página inicial","Login"] # "SignUp"
+choice = st.sidebar.selectbox("Menu",menu)
 
-selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
-page_names_to_funcs[selected_page]() 
+# Colocar algum tutorial de como usar o streamlit
+if choice == "Página inicial":
+    st.markdown('') # "<h1 style='text-align: center; font-size:60px;'>Página inicial</h1>", unsafe_allow_html=True
+    
+elif choice == "Login":
+    st.markdown('') #"<h1 style='text-align: center; font-size:60px;'>Login</h1>", unsafe_allow_html=True
+
+    username = st.sidebar.text_input("Nome de usuário")
+    password = st.sidebar.text_input("Senha",type='password')
+    if st.sidebar.checkbox("Login"):
+        # if password == '12345':
+        create_usertable()
+        hashed_pswd = make_hashes(password)
+
+        result = login_user(username,check_hashes(password,hashed_pswd))
+    
+        if result:
+
+                # Título do app 
+
+                st.markdown("<h1 style='text-align: center; font-size:60px;'>Apontamento de produção Pintura</h1>", unsafe_allow_html=True)
+
+                st.sidebar.success("Logado como {}".format(username))
+
+                page_names_to_funcs = {
+                    "Gerar Cambão": page1,
+                    "Finalizar Cambão": page2,
+                }
+                selected_page = st.selectbox("Selecione a função", page_names_to_funcs.keys())
+                page_names_to_funcs[selected_page]() 
+        else:
+                st.sidebar.error("Nome de usuário/Senha incorreto")
+                
+# elif choice == "SignUp":
+#     st.subheader("Create New Account")
+#     new_user = st.text_input("Username")
+#     new_password = st.text_input("Password",type='password')
+
+#     if st.button("Signup"):
+#         create_usertable()
+#         add_userdata(new_user,make_hashes(new_password))
+#         st.success("You have successfully created a valid Account")
+#         st.info("Go to Login Menu to login")
 
 with st.sidebar:
     st.write("<h1 style='text-align: center; font-size:10px; color: black'>Versão 16</h1>", unsafe_allow_html=True)
