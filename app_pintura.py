@@ -60,7 +60,7 @@ with st.sidebar:
     image = Image.open('logo-cemagL.png')
     st.image(image, width=300)
 
-@st.cache_resource #(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -82,7 +82,7 @@ def set_png_as_page_bg(png_file):
 
 set_png_as_page_bg('cemag_papel.png')
 
-#@st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 #@st.experimental_singleton
 def load_datas():
 
@@ -110,7 +110,7 @@ def load_datas():
     
     return wks1, sh1,table, table1#, lista_unicos
 
-#@st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 def load_datas1():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
