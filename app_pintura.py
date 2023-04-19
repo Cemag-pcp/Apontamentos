@@ -35,7 +35,6 @@ c = conn.cursor()
 def create_usertable():
 	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
 
-
 def add_userdata(username,password):
 	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
 	conn.commit()
@@ -44,7 +43,6 @@ def login_user(username,password):
 	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
 	data = c.fetchall()
 	return data
-
 
 def view_all_users():
 	c.execute('SELECT * FROM userstable')
@@ -110,7 +108,7 @@ def load_datas():
     
     return wks1, sh1,table, table1#, lista_unicos
 
-@st.cache(allow_output_mutation=True)
+#@st.cache(allow_output_mutation=True)
 def load_datas1():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
