@@ -58,7 +58,7 @@ with st.sidebar:
     image = Image.open('logo-cemagL.png')
     st.image(image, width=300)
 
-@st.cache(allow_output_mutation=True)
+st.cache_resource()
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
@@ -80,7 +80,6 @@ def set_png_as_page_bg(png_file):
 
 set_png_as_page_bg('cemag_papel.png')
 
-@st.cache_data(allow_output_mutation=True)
 def load_datas():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -235,7 +234,7 @@ def page1():
                                 data_return_mode='AS_INPUT',
                                 #custom_css=custom_css,
                                 width='100%',
-                                #update_mode='MANUAL',
+                                update_mode='MANUAL',
                                 height=500,
                                 fit_columns_on_grid_load = True,
                                 enable_enterprise_modules=True,
