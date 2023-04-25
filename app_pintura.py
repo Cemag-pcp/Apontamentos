@@ -80,8 +80,7 @@ def set_png_as_page_bg(png_file):
 
 set_png_as_page_bg('cemag_papel.png')
 
-@st.cache(allow_output_mutation=True)
-#@st.experimental_singleton
+@st.cache_data(allow_output_mutation=True)
 def load_datas():
 
     scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -293,7 +292,8 @@ def page1():
 
             filter_new = filter_new.values.tolist()
             sh1.values_append('Pintura', {'valueInputOption': 'RAW'}, {'values': filter_new})
-        
+            
+            
     if n_op != '':
         consultar(n_op,table)
 
@@ -313,7 +313,7 @@ def page2():
 
     st.write(tabs_font_css, unsafe_allow_html=True)
 
-    n_op = st.date_input("Data da carga")
+    n_op = st.date_input("Data da carga ")
     n_op = n_op.strftime("%d/%m/%Y")
 
     def consultar_2(wks1, n_op, sh1, table1):
@@ -441,6 +441,8 @@ with st.sidebar:
     
     if st.button("Atualizar"):
     # Clears all singleton caches:
-        st.experimental_singleton.clear()
+        st.experimental_rerun()  # invalida o cache da função
+
+        
     else:
         pass
