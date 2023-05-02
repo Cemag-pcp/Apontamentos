@@ -314,6 +314,7 @@ def page2():
 
     n_op = st.date_input("Data da carga ")
     n_op = n_op.strftime("%d/%m/%Y")
+    n_op = '02/05/2023'
 
     def consultar_2(wks1, n_op, sh1, table1):
             
