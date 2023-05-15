@@ -93,10 +93,10 @@ def page1():
 
             #df = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Plasma\OP15611.xls")
 
-            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+            name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
                         
-            sh = sa.open(name_sheet)
+            sh = sa.open_by_key(name_sheet)
             wks = sh.worksheet(worksheet)
 
             cell_list = wks.findall(n_op)
@@ -169,10 +169,10 @@ def page1():
                 
                 # Guardar no banco de dados
                 
-                name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+                name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                 worksheet = 'Criadas'
                 
-                sh = sa.open(name_sheet)
+                sh = sa.open_by_key(name_sheet)
                 
                 df_list = df.values.tolist()
                 sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
@@ -218,20 +218,20 @@ def page2():
         
         #verificando se op ja foi finalizada
 
-        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Finalizadas'
                     
-        sh = sa.open(name_sheet)
+        sh = sa.open_by_key(name_sheet)
         wks = sh.worksheet(worksheet)
 
         cell_list = wks.findall(n_op)
 
         if len(cell_list) == 0:
 
-            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+            name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
             
-            sh = sa.open(name_sheet)
+            sh = sa.open_by_key(name_sheet)
             wks = sh.worksheet(worksheet)
         
             list1 = wks.get_all_records()
@@ -312,20 +312,20 @@ def page2():
                             
                     # Guardar no banco de dados
                 
-                    name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+                    name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                     worksheet = 'Finalizadas'
                     
-                    sh = sa.open(name_sheet)
+                    sh = sa.open_by_key(name_sheet)
                     
                     df_list = df2.values.tolist()
                     
                     sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
 
                     try:
-                        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+                        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                         worksheet = 'Sequenciamento Plasma'
                                     
-                        sh = sa.open(name_sheet)
+                        sh = sa.open_by_key(name_sheet)
                         wks = sh.worksheet(worksheet)
 
                         headers = wks.row_values(5)
@@ -380,10 +380,10 @@ def page3():
             #df1 = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx",sheet_name='Nestings_Cost')
             #n_op = '14979'
             
-            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+            name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
                         
-            sh = sa.open(name_sheet)
+            sh = sa.open_by_key(name_sheet)
             wks = sh.worksheet(worksheet)
 
             cell_list = wks.findall(n_op)
@@ -433,10 +433,10 @@ def page3():
                             
                 # Guardar no banco de dados
                 
-                name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+                name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                 worksheet = 'Criadas'
                 
-                sh = sa.open(name_sheet)
+                sh = sa.open_by_key(name_sheet)
                 df_list = df.values.tolist()
                 sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
     
@@ -446,10 +446,10 @@ def page3():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser</h2>", unsafe_allow_html=True)
     
-    name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'    
+    name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'    
     worksheet = 'Chapas'
     
-    sh = sa.open(name_sheet)
+    sh = sa.open_by_key(name_sheet)
     wks = sh.worksheet(worksheet)
 
     headers = wks.row_values(1)
@@ -526,11 +526,11 @@ def page4():
     peca = st.text_input("Peça:")
     
     if peca != '':
-
-        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
-        worksheet = 'Criadas'
         
-        sh = sa.open(name_sheet)
+        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+        worksheet = 'Criadas'
+
+        sh = sa.open_by_key(name_sheet)
         wks = sh.worksheet(worksheet)
 
         list1 = wks.get_all_records()
@@ -566,10 +566,10 @@ def page4():
 
     if n_op != '':
 
-        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Criadas'
         
-        sh = sa.open(name_sheet)
+        sh = sa.open_by_key(name_sheet)
         wks = sh.worksheet(worksheet)
 
         list1 = wks.get_all_records()
@@ -622,10 +622,10 @@ def page4():
 
         if st.button("Duplicar"):
 
-            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
+            name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'ultima_OP'
             
-            sh = sa.open(name_sheet)
+            sh = sa.open_by_key(name_sheet)
             wks = sh.worksheet(worksheet)
 
             list1 = wks.get_all_records()
@@ -653,7 +653,7 @@ def page4():
             
             worksheet = 'Criadas'
             
-            sh = sa.open(name_sheet)
+            sh = sa.open_by_key(name_sheet)
             
             df_list = table2.values.tolist()
             
