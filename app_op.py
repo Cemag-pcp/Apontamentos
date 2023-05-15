@@ -249,8 +249,8 @@ def page2():
             table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce')
             table['qt. chapa'] = table['qt. chapa'] / 100
             
-            table['Aproveitamento'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce')
-            table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: f'0,{x-10}' if x > 1 else f'0,0{x}')
+            table['Aproveitamento'] = pd.to_numeric(table['Aproveitamento'], errors = 'coerce')
+            table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: '0,' + str(x) if x > 1 else x)
 
             caract_op = table[['Aproveitamento','Tamanho da chapa','qt. chapa','Espessura']][0:1]
             caract_op = caract_op.reset_index(drop=True)
@@ -544,6 +544,9 @@ def page4():
 
         table = table.reset_index(drop=True)
 
+        table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce') 
+        table['qt. chapa'] = table['qt. chapa'] / 100
+
         caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']]
 
         caract_op = caract_op.reset_index(drop=True)
@@ -582,7 +585,7 @@ def page4():
         
         table['qt. chapa'] = table['qt. chapa'] / 100
         table['Aproveitamento'] = pd.to_numeric(table['Aproveitamento'], errors='coerce')
-        table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: f'0,{x}' if x > 1 else x)
+        table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: '0,' + str(x) if x > 1 else x)
         
         table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
 
