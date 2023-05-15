@@ -882,13 +882,122 @@ def page3(): # script para agendar as manutencoes
 
     salvar_agendamento(df_planejamento)
 
-def page4(): # criar testes
+def page4(): # abertura de os
+
+    with st.form('my_form', clear_on_submit=True):
+        
+        col1, col2 = st.columns(2)
+
+        with col1:
+            selectSetor = st.selectbox("Informe seu setor", ('Selecione', 'Carpintaria', 'Pintura', 'Montagem', 'Solda'))
+            inputTomb = st.text_input("Informe o número de tombamento")
+        
+        with col2:
+            inputMaquina = st.text_input("Nome da máquina ou local do ocorrido")
+            radioParada = st.radio('Máquina parada?', ("Não", "Sim"), )
+            
+        txtDesc = st.text_area("Descrição do problema")
+        
+        dataAbertura = datetime.datetime.now()
+
+        st.write('')
+        st.write('')
+        st.write('')
+
+        btForm = st.form_submit_button("Enviar")
+    
+    if btForm:
+
+        scope = ['https://www.googleapis.com/auth/spreadsheets',
+        "https://www.googleapis.com/auth/drive"]
+
+        credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+        client = gspread.authorize(credentials)
+        sa = gspread.service_account('service_account.json')  
+
+        name_sheet = 'Plano 52 semanas - Manutenção Preventiva'
+        worksheet = 'Ordem de serviço'
+            
+        sh = sa.open(name_sheet)
+
+        wks = sh.worksheet(worksheet)
+        idOs = wks.get()
+        idOs = pd.DataFrame(idOs)
+        idOs = idOs.shape[0]
+        idOs = str(idOs)
+
+        tbAbertura = pd.DataFrame({'idOs':['OS' + str(idOs)], 'selectSetor':[selectSetor],
+                                    'txtDesc':[txtDesc],'inputTomb':[inputTomb],
+                                    'inputMaquina':[inputMaquina],'radioParada':[radioParada],
+                                    'dataAbertura':[dataAbertura.strftime("%d/%m/%Y %H:%M:%S")],'statusInicial':['Andamento']
+                                    })
+        
+        sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': tbAbertura.values.tolist()})
+
+        st.success('OS de número {} aberta!!'.format(idOs), icon="✅")    
+
+def page5(): # gerenciador de os
+
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+        "https://www.googleapis.com/auth/drive"]
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+    client = gspread.authorize(credentials)
+    sa = gspread.service_account('service_account.json')  
+
+    name_sheet = 'Plano 52 semanas - Manutenção Preventiva'
+    worksheet = 'Ordem de serviço'
+        
+    sh = sa.open(name_sheet)
+
+    wks = sh.worksheet(worksheet)
+    headers = wks.row_values(1)
+
+    tbOrdens = wks.get()
+    tbOrdens = pd.DataFrame(tbOrdens)
+    tbOrdens.set_axis(headers, axis=1, inplace=True)
+    tbOrdens = tbOrdens.iloc[1:]
+
+    with st.form('my_form'):
+        selectStatus = st.multiselect('Status', ('Andamento', 'Finalizada'), max_selections=1)
+        selectSetor = st.multiselect('Setor', ('Selecione', 'Carpintaria'), max_selections=1)
+        selectMaqParada = st.selectbox('Máquina parada?', ('Todas', 'Sim', 'Não'))
+
+        try:        
+            selectSetor = selectSetor[0]
+        except:
+            selectSetor = ''
+        try:                
+            selectStatus = selectStatus[0]
+        except:
+            selectStatus = ''
+
+        btFiltrar = st.form_submit_button("Filtrar")
+    
+        if btFiltrar:
+            
+            dadosFiltrados = tbOrdens.copy()
+
+            if selectStatus:
+                dadosFiltrados = dadosFiltrados[dadosFiltrados['Status'] == selectStatus]
+
+            if selectSetor:
+                dadosFiltrados = dadosFiltrados[dadosFiltrados['Setor'] == selectSetor]
+
+            if selectMaqParada == 'Todas':
+                pass        
+            else:
+                dadosFiltrados = dadosFiltrados[dadosFiltrados['Máquina parada'] == selectMaqParada]    
+
+def page6(): # criar testes
     print('testes')
 
 page_names_to_funcs = {
     "Cadastrar": page1,
-    "Informar manutenção": page2,
-    "testes": page4,
+    "Informar manutenção preventiva": page2,
+    "Abertura de OS": page4,
+    "Gerenciamento de OS": page5,
+    "testes": page6,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())

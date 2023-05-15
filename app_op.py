@@ -447,7 +447,8 @@ def page3():
 
     list1 = wks.get()
     table = pd.DataFrame(list1)
-    table = table.set_axis(headers, axis=1, inplace=False)[1:]
+    #table = table.set_axis(headers, axis=1, inplace=False)[1:]
+    table = table.set_axis(headers, axis=1, copy=False)[1:]
 
     opcoes_espessura = table[['espessura1']]
     opcoes_espessura = opcoes_espessura[opcoes_espessura['espessura1'] != ''].values.tolist()
