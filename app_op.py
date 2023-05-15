@@ -243,6 +243,15 @@ def page2():
             table = table.loc[(table.op == n_op)] # & (table.maquina == maq)]
             table = table.reset_index(drop=True)
 
+            # caract_op['Aproveitamento'] = pd.to_numeric(caract_op['Aproveitamento'], errors='coerce')
+            # caract_op['qt. chapa'] = pd.to_numeric(caract_op['qt. chapa'], errors='coerce')
+            
+            table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce')
+            table['qt. chapa'] = table['qt. chapa'] / 100
+
+            table['Aproveitamento'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce')
+            table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: f'0,{x}' if x > 1 else x)
+
             caract_op = table[['Aproveitamento','Tamanho da chapa','qt. chapa','Espessura']][0:1]
             caract_op = caract_op.reset_index(drop=True)
 
