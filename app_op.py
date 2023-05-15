@@ -572,7 +572,11 @@ def page4():
         table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce') 
         
         table['qt. chapa'] = table['qt. chapa'] / 100
+        table['Aproveitamento'] = pd.to_numeric(table['Aproveitamento'], errors='coerce')
+        table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: f'0,{x}' if x > 1 else x)
+        
         table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
+
         
         maq_antiga = table['maquina'][0]
         qt_antiga = table['qt. chapa'][0]
