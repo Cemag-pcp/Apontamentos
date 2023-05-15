@@ -568,7 +568,10 @@ def page4():
 
         table = table.loc[table['op'] == n_op]
         table = table.reset_index()
-
+        
+        table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce') 
+        
+        table['qt. chapa'] = table['qt. chapa'] / 100
         table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
         
         maq_antiga = table['maquina'][0]
