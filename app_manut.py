@@ -797,11 +797,9 @@ def page3(): # script para agendar as manutencoes
     data = pd.to_datetime(data, format="%d/%m/%Y") #+ timedelta(3) # rodar na sexta porém com data segunda-feira
     
     lista_indices = []
-    lista_colunas = []
 
     for i in range(1,7):
         indices = []
-        colunas = []
         for coluna in table.columns:
             data_str = data.strftime(format='%d-%m-%Y')
             idx = table.index[table[coluna] == data_str].tolist()

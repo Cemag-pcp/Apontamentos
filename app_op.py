@@ -93,7 +93,7 @@ def page1():
 
             #df = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Plasma\OP15611.xls")
 
-            name_sheet = 'Banco de dados OP'
+            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
             worksheet = 'Criadas'
                         
             sh = sa.open(name_sheet)
@@ -169,7 +169,7 @@ def page1():
                 
                 # Guardar no banco de dados
                 
-                name_sheet = 'Banco de dados OP'
+                name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
                 worksheet = 'Criadas'
                 
                 sh = sa.open(name_sheet)
@@ -218,7 +218,7 @@ def page2():
         
         #verificando se op ja foi finalizada
 
-        name_sheet = 'Banco de dados OP'
+        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
         worksheet = 'Finalizadas'
                     
         sh = sa.open(name_sheet)
@@ -228,7 +228,7 @@ def page2():
 
         if len(cell_list) == 0:
 
-            name_sheet = 'Banco de dados OP'
+            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
             worksheet = 'Criadas'
             
             sh = sa.open(name_sheet)
@@ -303,7 +303,7 @@ def page2():
                             
                     # Guardar no banco de dados
                 
-                    name_sheet = 'Banco de dados OP'
+                    name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
                     worksheet = 'Finalizadas'
                     
                     sh = sa.open(name_sheet)
@@ -313,7 +313,7 @@ def page2():
                     sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
 
                     try:
-                        name_sheet = 'Banco de dados OP'
+                        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
                         worksheet = 'Sequenciamento Plasma'
                                     
                         sh = sa.open(name_sheet)
@@ -371,7 +371,7 @@ def page3():
             #df1 = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx",sheet_name='Nestings_Cost')
             #n_op = '14979'
             
-            name_sheet = 'Banco de dados OP'
+            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
             worksheet = 'Criadas'
                         
             sh = sa.open(name_sheet)
@@ -424,7 +424,7 @@ def page3():
                             
                 # Guardar no banco de dados
                 
-                name_sheet = 'Banco de dados OP'
+                name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
                 worksheet = 'Criadas'
                 
                 sh = sa.open(name_sheet)
@@ -437,7 +437,7 @@ def page3():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser</h2>", unsafe_allow_html=True)
     
-    name_sheet = 'Banco de dados OP'    
+    name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'    
     worksheet = 'Chapas'
     
     sh = sa.open(name_sheet)
@@ -517,7 +517,7 @@ def page4():
     
     if peca != '':
 
-        name_sheet = 'Banco de dados OP'
+        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
         worksheet = 'Criadas'
         
         sh = sa.open(name_sheet)
@@ -553,7 +553,7 @@ def page4():
 
     if n_op != '':
 
-        name_sheet = 'Banco de dados OP'
+        name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
         worksheet = 'Criadas'
         
         sh = sa.open(name_sheet)
@@ -602,7 +602,7 @@ def page4():
 
         if st.button("Duplicar"):
 
-            name_sheet = 'Banco de dados OP'
+            name_sheet = 'RQ PCP-012-000 (Banco de dados OP)'
             worksheet = 'ultima_OP'
             
             sh = sa.open(name_sheet)
