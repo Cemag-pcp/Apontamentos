@@ -22,7 +22,7 @@ sa = gspread.service_account('service_account.json')
 
 # Título do app 
 
-st.markdown("<h1 style='text-align: center; font-size:80px; color: black'>Gerenciador de OP</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; font-size:40px; color: black'>Operador 4217</h1>", unsafe_allow_html=True)
 
 with st.sidebar:
     image = Image.open('logo-cemagL.png')
@@ -530,10 +530,10 @@ def page4():
             st.title('Número da nova op: ' + str(ult_op))
     
 page_names_to_funcs = {
-    "Criar OP - Plasma": page1,
-    "Criar OP - Laser": page3,
-    "Finalizar OP": page2,
-    "Duplicador de OP": page4,
+    "OPERADOR 4217": page1,
+    "OPERADOR 3654": page3,
+    "OPERADOR 4238": page2,
+    "OPERADOR 4200": page4,
 }
 
 selected_page = st.sidebar.selectbox("Selecione a função", page_names_to_funcs.keys())
