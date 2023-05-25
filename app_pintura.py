@@ -27,12 +27,12 @@ with st.sidebar:
 
 #@st.cache(allow_output_mutation=True)
 
-    scope = ['https://www.googleapis.com/auth/spreadsheets',
-             "https://www.googleapis.com/auth/drive"]
+scope = ['https://www.googleapis.com/auth/spreadsheets',
+            "https://www.googleapis.com/auth/drive"]
 
-    credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
-    client = gspread.authorize(credentials)
-    sa = gspread.service_account('service_account.json')    
+credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+client = gspread.authorize(credentials)
+sa = gspread.service_account('service_account.json')    
 
 def page1():
     
@@ -414,8 +414,50 @@ def page3():
 
 def page4():
     
-    def operador_4200():
+    def mostrar_novo_dataframe():
         
+        F = 'FALSE'
+        T = 'TRUE'
+
+        novo_dataframe = pd.DataFrame(tabela_antiga)  # Supondo que `novo_filtro` seja o resultado da grade interativa
+        novo_dataframe['FINALIZADO?'] = novo_dataframe['FINALIZADO?'].apply(lambda x: x.replace("SIM",T).replace("NÃO",F))
+        novo_dataframe = novo_dataframe[novo_dataframe['QTD REALIZADA'] != ""]
+        novo_dataframe = novo_dataframe[novo_dataframe['QTD REALIZADA'] != "None"]
+
+        id_alterado = novo_dataframe[novo_dataframe['QTD REALIZADA'] != ""][['ID']].values.tolist()[0][0]
+
+        novo_dataframe1 = novo_dataframe.iloc[:,5:7]
+        novo_dataframe2 = novo_dataframe.iloc[:,8:]
+
+        novo_dataframe_lista1 = novo_dataframe1.values.tolist()
+        novo_dataframe_lista2 = novo_dataframe2.values.tolist()
+        
+        name_sheet4 = 'RQ PCP-003-001 (APONTAMENTO ESTAMPARIA) / RQ PCP-009-000 (SEQUENCIAMENTO ESTAMPARIA) e RQ CQ-015-000 (Inspeção da Estamparia)'
+        worksheet4 = 'OPERADOR 4200'
+        sh4 = sa.open(name_sheet4)
+        wks4 = sh4.worksheet(worksheet4)
+        list4 = wks4.get()
+
+        header = wks4.row_values(5)
+        
+        table4 = pd.DataFrame(list4)
+        table4 =  table4.iloc[:,0:14]
+        table4 = table4.set_axis(header, axis=1)
+        table4 = table4.iloc[5:]
+
+        linha_para_alterar = str(table4[table4['ID'] == id_alterado].index[0] + 1)
+
+        ###### Atualizar o indice na planilha
+
+        wks4.update("F" + '177:G' + '177', novo_dataframe_lista1)
+        wks4.update("I" + '177', novo_dataframe_lista2)
+        
+        st.dataframe(novo_dataframe1)
+        st.dataframe(novo_dataframe2)
+        
+        
+    def operador_4200():
+
         name_sheet4 = 'RQ PCP-003-001 (APONTAMENTO ESTAMPARIA) / RQ PCP-009-000 (SEQUENCIAMENTO ESTAMPARIA) e RQ CQ-015-000 (Inspeção da Estamparia)'
         worksheet4 = 'OPERADOR 4200'
         sh4 = sa.open(name_sheet4)
@@ -428,108 +470,43 @@ def page4():
         table4.reset_index(drop=True)
 
         table4 = table4.rename(columns={0:'ID',1:'DATA',2:'CÓDIGO',3:'DESCRIÇÃO',4:'QTD PROG',5:'QTD REALIZADA',6:'MÁQUINA',7:'FINALIZADO?',8:'Nº DE MORTAS',9:'MOTIVO',10:'OBSERVAÇÃO',11:'PENDENTE',12:'',13:'CONCAT',14:'QUERY'})
+        
+        table4 = table4.loc[(table4['QTD REALIZADA'] == '') & (table4['CÓDIGO'] != '') & (table4['MÁQUINA'] == '') & (table4['FINALIZADO?'] == 'FALSE')]
 
-        table4 = table4.loc[(table4['QTD REALIZADA'] == '') & (table4['CÓDIGO'] != '') & (table4['MÁQUINA'] == '')]
+        table4['FINALIZADO?'] = ''
 
         table4.reset_index(drop=True)
 
         dropdown_tipo = ('VIRADEIRA 1','VIRADEIRA 2','VIRADEIRA 3','VIRADEIRA 4','VIRADEIRA 5','PRENSA','FORJARIA','MONTAGEM')
 
-        gb = GridOptionsBuilder.from_dataframe(table4)
-        gb.configure_default_column(min_column_width=10)
-        gb.configure_column('QTD PROG', editable=True,)
-        gb.configure_column('QTD REALIZADA', editable=True, cellEditor='agSelectCellEditor', cellEditorParams={'values': dropdown_tipo})
-        gb.configure_column('MÁQUINA', editable=True)
+        return dropdown_tipo, table4
 
-        grid_options = gb.build()
+    dropdown_tipo, table4 = operador_4200()
 
-        grid_response = AgGrid(table4,
-                                gridOptions=grid_options,
-                                data_return_mode='AS_INPUT',
-                                #custom_css=custom_css,
-                                width='100%',
-                                update_mode='MANUAL',
-                                height=500,
-                                fit_columns_on_grid_load = True,
-                                enable_enterprise_modules=True,
-                                theme='streamlit',
-                                allow_unsafe_jscode=True
-                                )    
-        
-        novo_filtro = grid_response['data']
-        
-        n_op = st.date_input("Data da carga")
-        n_op = n_op.strftime("%d/%m/%Y")
+    gb = GridOptionsBuilder.from_dataframe(table4)
+    gb.configure_default_column(min_column_width=10)
+    gb.configure_column('QTD REALIZADA', editable=True)
+    gb.configure_column('MÁQUINA', editable=True, cellEditor='agSelectCellEditor', cellEditorParams={'values': dropdown_tipo})
+    gb.configure_column('FINALIZADO?', editable=True, cellEditor='agSelectCellEditor', cellEditorParams={'values': ['SIM','NÃO']})
+    #add coluna de morta
+    
+    grid_options = gb.build()
 
-        def consultar_2(wks1, n_op, sh1, table1):
+    grid_response = AgGrid(table4,
+                            gridOptions=grid_options,
+                            data_return_mode='AS_INPUT',
+                            width='100%',
+                            update_mode='MANUAL',
+                            theme='streamlit',
+                            allow_unsafe_jscode=True
+                            )    
+    
+    tabela_antiga = grid_response['data']
+
+    # Crie o botão para mostrar o novo dataframe
+    if st.button('Salvar'):
+        mostrar_novo_dataframe()
                 
-            filter_ = table1.loc[(table1['DATA DA CARGA'] == n_op)]        
-                            
-            filter_ = filter_.reset_index(drop=True)
-            
-            filter_ = filter_.loc[(filter_['STATUS'] != 'OK')]
-
-            filter_ = filter_.rename(columns={'QT APONT.':'PROD.','DATA DA CARGA':'DT. CARGA'})
-
-            table_geral = filter_[['CODIGO', 'PEÇA', 'CAMBÃO', 'TIPO', 'PROD.','DT. CARGA','STATUS']]#, 'FLAG','SETOR']]
-
-            gb = GridOptionsBuilder.from_dataframe(table_geral)
-            gb.configure_default_column(min_column_width=100)
-            gb.configure_column('STATUS', editable=True)
-            #gb.configure_selection(selection_mode="multiple", use_checkbox=True)
-            grid_options = gb.build()
-
-            grid_response = AgGrid(table_geral,
-                                    gridOptions=grid_options,
-                                    data_return_mode='AS_INPUT',
-                                    width='100%',
-                                    update_mode='MANUAL',
-                                    height=500,
-                                    try_to_convert_back_to_original_types = False,
-                                    fit_columns_on_grid_load = True,
-                                    allow_unsafe_jscode=True,
-                                    enable_enterprise_modules=True,
-                                    theme='streamlit',
-                                    )    
-
-            filter_new = grid_response['data']
-
-            button2 = st.button('Salvar')
-
-            if button2:
-                
-                filter_new['COR'] = ''
-                filter_new['QT PLAN.'] = ''
-                filter_new['COR'] = ''
-                filter_new['SETOR'] = 'Pintura'
-                filter_new['DATA FINALIZADA'] = datetime.datetime.now().strftime('%d/%m/%Y')
-                
-                filter_new['FLAG'] = '' 
-
-                filter_new = filter_new[['FLAG','CODIGO', 'PEÇA','QT PLAN.','COR','PROD.','CAMBÃO','TIPO','DT. CARGA','DATA FINALIZADA','SETOR','STATUS']]#, 'FLAG','SETOR']]
-
-                filter_new['CAMBÃO'] = filter_new['CAMBÃO'].astype(str)
-
-                filter_new['FLAG'] = filter_new['CODIGO'] + filter_new['DATA FINALIZADA'] + filter_new['CAMBÃO']
-                filter_new['FLAG'] = filter_new['FLAG'].replace('/','', regex=True)
-
-                filter_new = filter_new.loc[(filter_new['STATUS'] != '')]
-
-                lista_flags = filter_new[['FLAG']].values.tolist()
-                
-                table1 = table1.loc[(table1['STATUS'] == '')]
-
-                for flags in range(len(lista_flags)):
-
-                    mudanca_status = table1.loc[(table1['FLAG']) == lista_flags[flags][0]]
-                    mudanca_status = mudanca_status.index[0] 
-
-                    wks1.update("L" + str(mudanca_status+2), 'OK')
-
-        if n_op != '':
-            consultar_2(wks1, n_op,sh1,table1)
-
-    operador_4200()
     
 page_names_to_funcs = {
     "OPERADOR 4217": page1,
