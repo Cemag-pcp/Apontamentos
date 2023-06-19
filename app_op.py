@@ -245,9 +245,10 @@ def page2():
 
             # caract_op['Aproveitamento'] = pd.to_numeric(caract_op['Aproveitamento'], errors='coerce')
             # caract_op['qt. chapa'] = pd.to_numeric(caract_op['qt. chapa'], errors='coerce')
-            
+
+            table['Aproveitamento'] = table['Aproveitamento'].astype(str)            
             table['Aproveitamento'] = table['Aproveitamento'].replace(",00","", regex=True).replace("%","", regex=True).replace("\.","",regex=True)
-            
+
             for i in range(len(table)):
                 if table['Aproveitamento'][i][0] != '0':
                     table['Aproveitamento'][i] = '0.' + table['Aproveitamento'][i]
