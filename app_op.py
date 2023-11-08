@@ -403,8 +403,8 @@ def page3():
                 qt_chapas = df1[df1.columns[2:3]][3:4]
                 qt_chapas_list = qt_chapas.values.tolist()[0][0]
 
-                aprov1 = df1[df1.columns[2:3]][7:8] 
-                aprov2 = df1[df1.columns[2:3]][9:10]
+                aprov1 = df1[df1.columns[4:5]][7:8] 
+                aprov2 = df1[df1.columns[4:5]][9:10]
                 aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) )
                 
                 df = df[['Unnamed: 1','Unnamed: 4']]
