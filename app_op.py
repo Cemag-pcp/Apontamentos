@@ -288,7 +288,7 @@ def page2():
             
             df2 = table
             
-            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermerson','Marcio','Alex'))
+            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermerson','Marcio','Alex','Leano','Assis'))
 
             if operador != "Selecione":
 
@@ -313,7 +313,7 @@ def page2():
                     # reordenando colunas
                 
                     df2 = df2[['op', 'Peças', 'Quantidade', 'Tamanho da chapa',
-                            'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'data finalização']]   
+                            'qt. chapa','Aproveitamento', 'Espessura', 'Mortas', 'Operador', 'data finalização']]   
 
                     df2 = df2.drop_duplicates()
                             
