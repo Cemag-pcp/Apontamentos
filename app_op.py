@@ -219,7 +219,7 @@ def page2():
         #verificando se op ja foi finalizada
 
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-        worksheet = 'RQ PCP-012-000'
+        worksheet = 'RQ PCP-004-000 (Apontamento Corte)'
                     
         sh = sa.open_by_key(name_sheet)
         wks = sh.worksheet(worksheet)
@@ -320,7 +320,7 @@ def page2():
                     # Guardar no banco de dados
                 
                     name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-                    worksheet = 'RQ PCP-012-000'
+                    worksheet = 'RQ PCP-004-000 (Apontamento Corte)'
                     
                     sh = sa.open_by_key(name_sheet)
                     
@@ -330,7 +330,7 @@ def page2():
 
                     try:
                         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-                        worksheet = 'Sequenciamento Plasma'
+                        worksheet = 'DQ PCP-003-000 (Sequenciamento Plasma)'
                                     
                         sh = sa.open_by_key(name_sheet)
                         wks = sh.worksheet(worksheet)
