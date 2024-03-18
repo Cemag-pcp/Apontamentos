@@ -81,8 +81,6 @@ def view_all_users():
 	data = c.fetchall()
 	return data
 
-# Contents of ~/my_app/streamlit_app.py
-
 def page1():
     
     def create_op_plasma(df, n_op):
@@ -91,7 +89,7 @@ def page1():
         
             # Op extraída do pronest
 
-            #df = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Plasma\OP15611.xls")
+            # df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18485 PL1 #1,4 4050 X 1200 2x.xls")
 
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
@@ -148,6 +146,8 @@ def page1():
                 lista = df.values.tolist()
             
                 # Criando colunas na tabela para guardar no bando de dados
+
+                df = df.loc[0:df[df['Unnamed: 19'].isnull()].index[0]-1]
 
                 df['Unnamed: 19'] = df['Unnamed: 19'].astype(int)
                 df['espessura'] = espessura_list[0][0]
