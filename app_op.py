@@ -89,7 +89,7 @@ def page1():
         
             # Op extraída do pronest
 
-            # df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18485 PL1 #1,4 4050 X 1200 2x.xls")
+            df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18486 PL1 #5,32 6000 X 1500.xls")
 
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
@@ -147,8 +147,11 @@ def page1():
             
                 # Criando colunas na tabela para guardar no bando de dados
 
-                df = df.loc[0:df[df['Unnamed: 19'].isnull()].index[0]-1]
-
+                try:
+                    df = df.loc[:df[df['Unnamed: 19'].isnull()].index[0]-1]
+                except:
+                    pass
+                
                 df['Unnamed: 19'] = df['Unnamed: 19'].astype(int)
                 df['espessura'] = espessura_list[0][0]
                 df['aproveitamento'] = aproveitamento_list[0]
