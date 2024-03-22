@@ -386,7 +386,8 @@ def page3():
         
             # Op extraída do lantek
     
-            #df = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx")
+            # df = pd.read_excel("OP2416 L1.xlsx")
+            # df1 = pd.read_excel("OP2416 L1.xlsx",sheet_name='Nestings_Cost')
             #df1 = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx",sheet_name='Nestings_Cost')
             #n_op = '14979'
             
