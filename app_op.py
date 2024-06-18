@@ -291,7 +291,7 @@ def page2():
             
             df2 = table
             
-            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermerson','Marcio','Alex','Leano','Assis'))
+            operador = st.selectbox("Operador", ('Selecione', 'Jefferson', 'Hermerson','Marcio','Alex','Leano','Assis','Dionélio'))
 
             if operador != "Selecione":
 
