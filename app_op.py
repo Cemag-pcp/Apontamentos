@@ -11,15 +11,19 @@ from datetime import date
 from datetime import datetime
 import sqlite3 
 import hashlib
+from google.oauth2 import service_account
 
 # Connect to Google Sheets
+service_account_info = st.secrets["GOOGLE_SERVICE_ACCOUNT"]
 
 scope = ['https://www.googleapis.com/auth/spreadsheets',
          "https://www.googleapis.com/auth/drive"]
 
-credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
-client = gspread.authorize(credentials)
-sa = gspread.service_account('service_account.json')
+# credentials = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes=scope)
+
+sa = gspread.authorize(credentials)
+# sa = gspread.service_account('service_account.json')
 
 # ======================================= #
 
@@ -346,7 +350,7 @@ def page2():
 
                         linha_op_finalizada = table.loc[(table['Op'] == n_op)].index[0] + 1
 
-                        wks.update('I' + str(linha_op_finalizada), operador)
+                        wks.update('I' + str(linha_op_finalizada), [[operador]])
                     except:
                         pass
 
@@ -656,7 +660,7 @@ def page4():
 
             ult_op = table['ultima_op'].values.tolist()[0] + 1
     
-            wks.update('A2', ult_op)
+            wks.update('A2', [[ult_op]])
             
             table2['Quantidade'] = table2['Quantidade'].astype(int)
             
