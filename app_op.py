@@ -89,105 +89,105 @@ def page1():
     
     def create_op_plasma(df, n_op):
         
-            # ======================================= #
+        # ======================================= #
+    
+        # Op extraída do pronest
+
+        # df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18486 PL1 #5,32 6000 X 1500.xls")
+
+        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+        worksheet = 'Criadas'
+                    
+        sh = sa.open_by_key(name_sheet)
+        wks = sh.worksheet(worksheet)
+
+        cell_list = wks.findall(n_op)
+
+        if len(cell_list)==0:
+
+            df = df.dropna(how='all')
+            
+            tamanho_chapa = df[df.columns[16:17]][9:10].replace('×', 'x')
+            qt_chapa = df[df.columns[2:3]][9:10]
+            
+            nome_coluna_1 = df[df.columns[0]].name
+            aproveitamento_df = df['Unnamed: 16'][4:5]
+                    
+            df = df[17:df.shape[0]-2]
+            
+            df = df[[nome_coluna_1,'Unnamed: 19', 'Unnamed: 20', 'Unnamed: 27', 'Unnamed: 32', 'Unnamed: 35']]
+            df = df.dropna(how='all')
+            
+            espessura_df = df[df.columns[2:3]][2:3]
+
+            df = df[[nome_coluna_1,'Unnamed: 19', 'Unnamed: 27', 'Unnamed: 32', 'Unnamed: 35']]
+            
+            df = df[2:]
         
-            # Op extraída do pronest
+            # quantidade de chapa
+            
+            qt_chapa_list = qt_chapa.values.tolist()
+            
+            # tamanho da chapa
+            
+            tamanho_chapa_list = tamanho_chapa.values.tolist()
+            
+            # aproveitamento
+            
+            aproveitamento_list = aproveitamento_df.values.tolist()
+            
+            # espessura
+            
+            espessura_list = espessura_df.values.tolist()
+            
+            # cabeçalho da tabela
+            
+            cabecalho_df = pd.DataFrame({'Peças':['Peças'], 'Quantidade':['Quantidade'], 
+                                    'Tamanho chapa':['Tamanho chapa'],
+                                    'Peso':['Peso'], 'Tempo':['Tempo']})
+            cabecalho_list = cabecalho_df.values.tolist()
+            
+            lista = df.values.tolist()
+        
+            # Criando colunas na tabela para guardar no bando de dados
 
-            # df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18486 PL1 #5,32 6000 X 1500.xls")
+            try:
+                df = df.loc[:df[df['Unnamed: 19'].isnull()].index[0]-1]
+            except:
+                pass
+            
+            df['Unnamed: 19'] = df['Unnamed: 19'].astype(int)
+            df['espessura'] = espessura_list[0][0]
+            df['aproveitamento'] = aproveitamento_list[0]
+            df['tamanho da chapa'] = tamanho_chapa_list[0][0]
+            df['qt. chapas'] = int(qt_chapa_list[0][0])
+            df['op'] = n_op
 
+            # reordenar colunas
+            
+            cols = df.columns.tolist()
+            cols = cols[-1:] + cols[:-1]
+            df = df[cols]
+            
+            df['data criada'] = date.today().strftime('%d/%m/%Y')
+            df['Máquina'] = 'Plasma'
+            df['op_espelho'] = ''
+            df['opp'] = 'opp'
+            
+            # Guardar no banco de dados
+            
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
-                        
+            
             sh = sa.open_by_key(name_sheet)
-            wks = sh.worksheet(worksheet)
-
-            cell_list = wks.findall(n_op)
-
-            if len(cell_list)==0:
-
-                df = df.dropna(how='all')
-                
-                tamanho_chapa = df[df.columns[16:17]][9:10].replace('×', 'x')
-                qt_chapa = df[df.columns[2:3]][9:10]
-                
-                nome_coluna_1 = df[df.columns[0]].name
-                aproveitamento_df = df['Unnamed: 16'][4:5]
-                        
-                df = df[17:df.shape[0]-2]
-                
-                df = df[[nome_coluna_1,'Unnamed: 19', 'Unnamed: 20', 'Unnamed: 27', 'Unnamed: 32', 'Unnamed: 35']]
-                df = df.dropna(how='all')
-                
-                espessura_df = df[df.columns[2:3]][2:3]
-
-                df = df[[nome_coluna_1,'Unnamed: 19', 'Unnamed: 27', 'Unnamed: 32', 'Unnamed: 35']]
-                
-                df = df[2:]
             
-                # quantidade de chapa
-                
-                qt_chapa_list = qt_chapa.values.tolist()
-                
-                # tamanho da chapa
-                
-                tamanho_chapa_list = tamanho_chapa.values.tolist()
-                
-                # aproveitamento
-                
-                aproveitamento_list = aproveitamento_df.values.tolist()
-                
-                # espessura
-                
-                espessura_list = espessura_df.values.tolist()
-                
-                # cabeçalho da tabela
-                
-                cabecalho_df = pd.DataFrame({'Peças':['Peças'], 'Quantidade':['Quantidade'], 
-                                        'Tamanho chapa':['Tamanho chapa'],
-                                        'Peso':['Peso'], 'Tempo':['Tempo']})
-                cabecalho_list = cabecalho_df.values.tolist()
-                
-                lista = df.values.tolist()
+            df_list = df.values.tolist()
+            sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
             
-                # Criando colunas na tabela para guardar no bando de dados
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
 
-                try:
-                    df = df.loc[:df[df['Unnamed: 19'].isnull()].index[0]-1]
-                except:
-                    pass
-                
-                df['Unnamed: 19'] = df['Unnamed: 19'].astype(int)
-                df['espessura'] = espessura_list[0][0]
-                df['aproveitamento'] = aproveitamento_list[0]
-                df['tamanho da chapa'] = tamanho_chapa_list[0][0]
-                df['qt. chapas'] = int(qt_chapa_list[0][0])
-                df['op'] = n_op
-
-                # reordenar colunas
-                
-                cols = df.columns.tolist()
-                cols = cols[-1:] + cols[:-1]
-                df = df[cols]
-                
-                df['data criada'] = date.today().strftime('%d/%m/%Y')
-                df['Máquina'] = 'Plasma'
-                df['op_espelho'] = ''
-                df['opp'] = 'opp'
-                
-                # Guardar no banco de dados
-                
-                name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-                worksheet = 'Criadas'
-                
-                sh = sa.open_by_key(name_sheet)
-                
-                df_list = df.values.tolist()
-                sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
-                
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
-
-            else:
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já estava aberta!</h2>", unsafe_allow_html=True)
+        else:
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já estava aberta!</h2>", unsafe_allow_html=True)
 
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Plasma</h2>", unsafe_allow_html=True)
     
@@ -206,8 +206,10 @@ def page1():
     
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
+        # df = pd.read_excel(r"op 119 JFY #1,4 1200 x 4050.xlsx")
         name_file = uploaded_file.name
         name_file = name_file[2:7]
+        # name_file = extrair_num_op(name_file)
         n_op = str(name_file)
     
         if n_op != '':
@@ -527,7 +529,103 @@ def page3():
         
             if st.button('Gerar OP'):
                 create_op_laser(df, n_op, df1)    
-                
+
+def page5():
+    
+    def create_op_laser2(df, n_op, df2):
+        
+        # ======================================= #
+    
+        # Op extraída do pronest
+
+        # df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18486 PL1 #5,32 6000 X 1500.xls")
+
+        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+        worksheet = 'Criadas'
+                    
+        sh = sa.open_by_key(name_sheet)
+        wks = sh.worksheet(worksheet)
+
+        cell_list = wks.findall(n_op)
+        # df2 = pd.read_excel(r'op 133 JFY #1,4 1200 x 4050.nrp2.xlsx', sheet_name='AllPartsList')
+
+        if len(cell_list)==0:
+
+            tamanho_chapa = df['Unnamed: 2'][6].replace(".",",").replace("*","×") + " mm"
+            qt_chapa = df['Unnamed: 3'][6]
+            aproveitamento_df = df['Unnamed: 5'][6]
+            espessura_df = str(df['Unnamed: 2'][2]).replace(".",",") + " mm"
+            
+            df2.columns = df2.iloc[0]
+            df2 = df2[1:].reset_index(drop=True)
+            df2 = df2[['Part name','Amount:','Part size (mm*mm)']]
+
+            df2['espessura'] = espessura_df
+            df2['aproveitamento'] = aproveitamento_df
+            df2['tamanho da chapa'] = tamanho_chapa
+            df2['qt. chapas'] = qt_chapa
+            df2['op'] = n_op
+            df2['Peso'] = ''
+            df2['Tempo'] = ''
+
+            # reordenar colunas
+            df2 = df2[['op','Part name','Amount:','Part size (mm*mm)','Peso','Tempo','espessura','aproveitamento','tamanho da chapa', 'qt. chapas']]
+
+            df2['data criada'] = date.today().strftime('%d/%m/%Y')
+            df2['Máquina'] = 'Laser JYF'
+            df2['op_espelho'] = ''
+            df2['opp'] = 'opp'
+
+            # Guardar no banco de dados
+            
+            name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+            worksheet = 'Criadas'
+            
+            sh = sa.open_by_key(name_sheet)
+            
+            df_list = df2.values.tolist()
+            sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
+            
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
+
+        else:
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já estava aberta!</h2>", unsafe_allow_html=True)
+
+    st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser 2</h2>", unsafe_allow_html=True)
+    
+    tabs_font_css = """
+    <style>
+    div[class*="element-container css-1hynsf2 e1tzin5v3"] label p {
+    font-size: 26px;
+    color: black;
+    }
+    </style>
+    """
+
+    st.write(tabs_font_css, unsafe_allow_html=True)
+    
+    uploaded_file = st.file_uploader("Escolha um arquivo", type="xlsx")
+
+    def extrair_num_op(string):
+        # Define a regex que corresponde ao padrão desejado
+        match = re.search(r'op\s*(\d+)', string, re.IGNORECASE)
+        if match:
+            return match.group(1)
+        return None
+    
+    if uploaded_file:
+        df = pd.read_excel(uploaded_file)
+        df2 = pd.read_excel(uploaded_file, sheet_name='AllPartsList')
+        name_file = uploaded_file.name
+        # name_file = name_file[2:7]
+        name_file = extrair_num_op(name_file)
+        n_op = str(name_file) + ' JFY'
+    
+        if n_op != '':
+        
+            if st.button('Gerar OP'):
+                create_op_laser2(df, n_op, df2)    
+
 def page4():
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Duplicador de OP</h2>", unsafe_allow_html=True)
@@ -719,6 +817,7 @@ elif choice == "Login":
                 page_names_to_funcs = {
                     "Criar OP - Plasma": page1,
                     "Criar OP - Laser": page3,
+                    "Criar OP - Laser 2": page5,
                     "Finalizar OP": page2,
                     "Duplicador de OP": page4,
                 }
