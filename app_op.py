@@ -552,8 +552,8 @@ def page5():
         if len(cell_list)==0:
 
             tamanho_chapa = df['Unnamed: 2'][6].replace(".",",").replace("*","×") + " mm"
-            qt_chapa = df['Unnamed: 3'][6]
-            aproveitamento_df = df['Unnamed: 5'][6]
+            qt_chapa = df['Unnamed: 3'][6:len(df)-1].sum()
+            aproveitamento_df = df['Unnamed: 5'][6:len(df)-1].mean()
             espessura_df = str(df['Unnamed: 2'][2]).replace(".",",") + " mm"
             
             df2.columns = df2.iloc[0]
@@ -614,6 +614,7 @@ def page5():
         return None
     
     if uploaded_file:
+        
         df = pd.read_excel(uploaded_file)
         df2 = pd.read_excel(uploaded_file, sheet_name='AllPartsList')
         name_file = uploaded_file.name
