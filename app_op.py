@@ -12,6 +12,8 @@ from datetime import datetime
 import sqlite3 
 import hashlib
 from google.oauth2 import service_account
+import time 
+import random
 
 # Connect to Google Sheets
 service_account_info = st.secrets["GOOGLE_SERVICE_ACCOUNT"]
@@ -24,6 +26,44 @@ credentials = service_account.Credentials.from_service_account_info(service_acco
 
 sa = gspread.authorize(credentials)
 # sa = gspread.service_account('service_account.json')
+
+name_sheet = 'Bases para sequenciamento'
+worksheet1 = 'Base_Carretas'
+worksheet2 = 'Carga_Vendas'
+maximum_backoff = 64  # Valor máximo em segundos
+max_retries = 5  # Número máximo de tentativas
+
+# Conectando ao Google Sheets
+sa = gspread.service_account(filename="service_account.json")
+sh = sa.open(name_sheet)
+
+def get_all_records_with_backoff(id_sheet):
+    attempt = 0
+
+    while attempt < max_retries:
+        try:
+            # Tenta obter os registros
+            sh = sa.open_by_key(id_sheet)
+            # records = worksheet.get_all_records()
+            return sh  # Retorna os registros se bem-sucedido
+
+        except Exception as e:
+            attempt += 1
+            if attempt >= max_retries:
+                print(f"Falha ao obter dados após {attempt} tentativas.")
+                raise e  # Re-lança a exceção após o número máximo de tentativas
+
+            # Cálculo do tempo de espera exponencial com backoff
+            wait_time = min(((2 ** attempt) + random.randint(0, 1000) / 1000), maximum_backoff)
+            print(f"Tentativa {attempt} falhou. Esperando {wait_time:.2f} segundos antes de tentar novamente...")
+            time.sleep(wait_time)
+
+# Obtendo os valores da planilha com espera exponencial
+# wks1 = sh.worksheet(worksheet1)
+# list1 = get_all_records_with_backoff(wks1)
+
+# wks2 = sh.worksheet(worksheet2)
+# list2 = get_all_records_with_backoff(wks2)
 
 # ======================================= #
 
@@ -98,7 +138,8 @@ def page1():
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Criadas'
                     
-        sh = sa.open_by_key(name_sheet)
+        # sh = sa.open_by_key(name_sheet)
+        sh = get_all_records_with_backoff(name_sheet)
         wks = sh.worksheet(worksheet)
 
         cell_list = wks.findall(n_op)
@@ -179,7 +220,8 @@ def page1():
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
             
-            sh = sa.open_by_key(name_sheet)
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
             
             df_list = df.values.tolist()
             sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
@@ -230,7 +272,8 @@ def page2():
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'RQ PCP-004-000 (Apontamento Corte)'
                     
-        sh = sa.open_by_key(name_sheet)
+        # sh = sa.open_by_key(name_sheet)
+        sh = get_all_records_with_backoff(name_sheet)
         wks = sh.worksheet(worksheet)
 
         cell_list = wks.findall(n_op)
@@ -240,7 +283,8 @@ def page2():
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
             
-            sh = sa.open_by_key(name_sheet)
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
             wks = sh.worksheet(worksheet)
         
             list1 = wks.get_all_records()
@@ -331,7 +375,8 @@ def page2():
                     name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                     worksheet = 'RQ PCP-004-000 (Apontamento Corte)'
                     
-                    sh = sa.open_by_key(name_sheet)
+                    # sh = sa.open_by_key(name_sheet)
+                    sh = get_all_records_with_backoff(name_sheet)
                     
                     df_list = df2.values.tolist()
                     
@@ -341,7 +386,8 @@ def page2():
                         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                         worksheet = 'DQ PCP-003-000 (Sequenciamento Plasma)'
                                     
-                        sh = sa.open_by_key(name_sheet)
+                        # sh = sa.open_by_key(name_sheet)
+                        sh = get_all_records_with_backoff(name_sheet)
                         wks = sh.worksheet(worksheet)
 
                         headers = wks.row_values(5)
@@ -400,7 +446,8 @@ def page3():
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
                         
-            sh = sa.open_by_key(name_sheet)
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
             wks = sh.worksheet(worksheet)
 
             cell_list = wks.findall(n_op)
@@ -458,7 +505,8 @@ def page3():
                 name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
                 worksheet = 'Criadas'
                 
-                sh = sa.open_by_key(name_sheet)
+                # sh = sa.open_by_key(name_sheet)
+                sh = get_all_records_with_backoff(name_sheet)
                 df_list = df.values.tolist()
                 sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
     
@@ -471,7 +519,8 @@ def page3():
     name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'    
     worksheet = 'Chapas'
     
-    sh = sa.open_by_key(name_sheet)
+    # sh = sa.open_by_key(name_sheet)
+    sh = get_all_records_with_backoff(name_sheet)
     wks = sh.worksheet(worksheet)
 
     headers = wks.row_values(1)
@@ -538,13 +587,18 @@ def page5():
     
         # Op extraída do pronest
 
-        # df = pd.read_excel(r"C:\Users\pcp2\Downloads\OP18486 PL1 #5,32 6000 X 1500.xls")
+        # df = pd.read_excel(r"op 291 JFY #11 1500 x 2500.xlsx")
 
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Criadas'
                     
-        sh = sa.open_by_key(name_sheet)
+        # sh = sa.open_by_key(name_sheet)
+        sh = get_all_records_with_backoff(name_sheet)
         wks = sh.worksheet(worksheet)
+
+        # wks2 = sh.worksheet(worksheet2)
+        # list2 = get_all_records_with_backoff(wks2)
+
 
         cell_list = wks.findall(n_op)
         # df2 = pd.read_excel(r'op 133 JFY #1,4 1200 x 4050.nrp2.xlsx', sheet_name='AllPartsList')
@@ -581,7 +635,8 @@ def page5():
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
             
-            sh = sa.open_by_key(name_sheet)
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
             
             df_list = df2.values.tolist()
             sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
@@ -649,7 +704,8 @@ def page4():
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Criadas'
 
-        sh = sa.open_by_key(name_sheet)
+        # sh = sa.open_by_key(name_sheet)
+        sh = get_all_records_with_backoff(name_sheet)
         wks = sh.worksheet(worksheet)
 
         list1 = wks.get_all_records()
@@ -688,7 +744,8 @@ def page4():
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Criadas'
         
-        sh = sa.open_by_key(name_sheet)
+        # sh = sa.open_by_key(name_sheet)
+        sh = get_all_records_with_backoff(name_sheet)
         wks = sh.worksheet(worksheet)
 
         list1 = wks.get_all_records()
@@ -751,7 +808,8 @@ def page4():
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'ultima_OP'
             
-            sh = sa.open_by_key(name_sheet)
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
             wks = sh.worksheet(worksheet)
 
             list1 = wks.get_all_records()
@@ -779,7 +837,8 @@ def page4():
             
             worksheet = 'Criadas'
             
-            sh = sa.open_by_key(name_sheet)
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
             
             df_list = table2.values.tolist()
             
