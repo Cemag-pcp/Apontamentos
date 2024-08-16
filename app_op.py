@@ -27,15 +27,12 @@ credentials = service_account.Credentials.from_service_account_info(service_acco
 sa = gspread.authorize(credentials)
 # sa = gspread.service_account('service_account.json')
 
-name_sheet = 'Bases para sequenciamento'
-worksheet1 = 'Base_Carretas'
-worksheet2 = 'Carga_Vendas'
 maximum_backoff = 64  # Valor máximo em segundos
 max_retries = 5  # Número máximo de tentativas
 
 # Conectando ao Google Sheets
-sa = gspread.service_account(filename="service_account.json")
-sh = sa.open(name_sheet)
+# sa = gspread.service_account(filename="service_account.json")
+# sh = sa.open(name_sheet)
 
 def get_all_records_with_backoff(id_sheet):
     attempt = 0
