@@ -695,9 +695,13 @@ def page4():
     st.write(tabs_font_css, unsafe_allow_html=True)
 
     peca = st.text_input("Peça:")
+    multi = '**Para filtrar por mais de um código de peça, separe-os usando vírgulas.** Ex: ***030317,030318,030645***'
+    st.markdown(multi)
     
     if peca != '':
-        
+
+        pecas_list = [codigo.strip() for codigo in peca.split(',')]
+
         name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
         worksheet = 'Criadas'
 
@@ -705,34 +709,50 @@ def page4():
         sh = get_all_records_with_backoff(name_sheet)
         wks = sh.worksheet(worksheet)
 
+        # Obter os registros e convertê-los em DataFrame
         list1 = wks.get_all_records()
         table = pd.DataFrame(list1)
         table = table.drop_duplicates()
-        
+
         table['op'] = table['op'].astype(str)
 
-        table = table.set_index('Peças').filter(like=peca, axis=0)
-        table = table.set_index('opp').filter(like='opp', axis=0)
+        # Filtrar a tabela para incluir apenas as peças especificadas na lista
+        pattern = '|'.join(pecas_list)
+        table = table[table['Peças'].astype(str).str.contains(pattern, regex=True, na=False)]
+        
+        # Filtrar pelo campo 'opp' (opcional, dependendo da sua necessidade)
+        table = table[table['opp'].astype(str).str.contains('opp')]
 
+        # Resetar o índice
         table = table.reset_index(drop=True)
 
-        table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce') 
+        # Converter a quantidade de chapa para numérico e ajustar a divisão
+        table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors='coerce')
         table['qt. chapa'] = table['qt. chapa'] / 100
 
-        caract_op = table[['op','Tamanho da chapa','qt. chapa','Espessura']]
+        # Selecionar as colunas desejadas
+        caract_op = table[['op', 'Tamanho da chapa', 'qt. chapa', 'Espessura','Aproveitamento']]
 
-        caract_op = caract_op.reset_index(drop=True)
+        op_counts = caract_op.groupby('op').filter(lambda x: len(x) == len(pecas_list))
 
-        gb = GridOptionsBuilder.from_dataframe(caract_op)
-        grid_options = gb.build()
-        grid_response = AgGrid(caract_op, 
-                    gridOptions=grid_options,
-                    width='100%',
-                    height=400,
-                    fit_columns_on_grid_load = True,
-                    update_model='MODEL_CHANGE\D')
+        op_counts = op_counts.drop_duplicates(subset=['op'])
 
-        new_carac = grid_response['data']
+        # Resetar o índice novamente para facilitar a exibição
+        op_counts = op_counts.reset_index(drop=True)
+        # Configurar a tabela para exibição no AgGrid
+        st.dataframe(op_counts,height=280)
+        # gb = GridOptionsBuilder.from_dataframe(caract_op)
+        # grid_options = gb.build()
+        # grid_response = AgGrid(
+        #     op_counts,
+        #     gridOptions=grid_options,
+        #     width='100%',
+        #     height=400,
+        #     fit_columns_on_grid_load=True,
+        #     update_model='MODEL_CHANGE'
+        # )
+
+        # new_carac = grid_response['data']
 
     n_op = st.text_input("Op:")
 
