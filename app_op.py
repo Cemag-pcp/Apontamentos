@@ -130,7 +130,7 @@ def page1():
             tipo_chapa = 'A.D'
         elif tipo_chapa == 'Alta resistência':
             tipo_chapa = 'A.R'
-        elif tipo_chapa == 'Selecione':
+        elif tipo_chapa == 'Aço carbono':
             tipo_chapa = ''
 
         # ======================================= #
@@ -250,7 +250,7 @@ def page1():
     
     uploaded_file = st.file_uploader("Escolha um arquivo", type="xls")
 
-    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione','Anti derrapante','Alta resistência'))
+    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione','Aço carbono','Anti derrapante','Alta resistência'))
 
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
@@ -263,7 +263,10 @@ def page1():
         if n_op != '':
         
             if st.button('Gerar OP'):
-                create_op_plasma(df, n_op)    
+                if tipo_chapa == 'Selecione':
+                    return st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>Escolha uma opção de tipo de chapa!!</h2>", unsafe_allow_html=True) 
+                else:
+                    create_op_plasma(df, n_op, tipo_chapa)    
                 
 def page2():
     
@@ -444,7 +447,7 @@ def page3():
             tipo_chapa = 'A.D'
         elif tipo_chapa == 'Alta resistência':
             tipo_chapa = 'A.R'
-        elif tipo_chapa == 'Selecione':
+        elif tipo_chapa == 'Aço carbono':
             tipo_chapa = ''
             
         # ======================================= #
@@ -578,7 +581,8 @@ def page3():
     tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
     
     uploaded_file = st.file_uploader("Escolha um arquivo", type="xlsx")
-    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione','Anti derrapante','Alta resistência'))
+    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione','Aço carbono','Anti derrapante','Alta resistência'))
+    
 
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
@@ -591,7 +595,11 @@ def page3():
         if n_op != '':
         
             if st.button('Gerar OP'):
-                create_op_laser(df, n_op, df1, tipo_chapa)    
+                if tipo_chapa == 'Selecione':
+                    return st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>Escolha uma opção de tipo de chapa!!</h2>", unsafe_allow_html=True) 
+
+                else:
+                    create_op_laser(df, n_op, df1, tipo_chapa)    
 
 def page5():
     
@@ -601,7 +609,7 @@ def page5():
             tipo_chapa = 'A.D'
         elif tipo_chapa == 'Alta resistência':
             tipo_chapa = 'A.R'
-        elif tipo_chapa == 'Selecione':
+        elif tipo_chapa == 'Aço carbono':
             tipo_chapa = ''
 
         # ======================================= #
@@ -681,7 +689,7 @@ def page5():
     
     uploaded_file = st.file_uploader("Escolha um arquivo", type="xlsx")
 
-    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione', 'Inox', 'Anti derrapante','Alta resistência'))
+    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione', 'Aço carbono', 'Inox', 'Anti derrapante','Alta resistência'))
 
     def extrair_num_op(string):
         # Define a regex que corresponde ao padrão desejado
@@ -702,7 +710,10 @@ def page5():
         if n_op != '':
         
             if st.button('Gerar OP'):
-                create_op_laser2(df, n_op, df2, tipo_chapa)    
+                if tipo_chapa == 'Selecione':
+                    return st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>Escolha uma opção de tipo de chapa!!</h2>", unsafe_allow_html=True) 
+                else:
+                    create_op_laser2(df, n_op, df2, tipo_chapa)    
 
 def page4():
     
