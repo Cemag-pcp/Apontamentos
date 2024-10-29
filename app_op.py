@@ -124,8 +124,15 @@ def view_all_users():
 
 def page1():
     
-    def create_op_plasma(df, n_op):
+    def create_op_plasma(df, n_op, tipo_chapa):
         
+        if tipo_chapa == 'Anti derrapante':
+            tipo_chapa = 'A.D'
+        elif tipo_chapa == 'Alta resistência':
+            tipo_chapa = 'A.R'
+        elif tipo_chapa == 'Selecione':
+            tipo_chapa = ''
+
         # ======================================= #
     
         # Op extraída do pronest
@@ -195,7 +202,7 @@ def page1():
                 pass
             
             df['Unnamed: 19'] = df['Unnamed: 19'].astype(int)
-            df['espessura'] = espessura_list[0][0]
+            df['espessura'] = espessura_list[0][0] + " " + tipo_chapa
             df['aproveitamento'] = aproveitamento_list[0]
             df['tamanho da chapa'] = tamanho_chapa_list[0][0]
             df['qt. chapas'] = int(qt_chapa_list[0][0])
@@ -242,7 +249,9 @@ def page1():
     st.write(tabs_font_css, unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader("Escolha um arquivo", type="xls")
-    
+
+    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione','Anti derrapante','Alta resistência'))
+
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
         # df = pd.read_excel(r"op 119 JFY #1,4 1200 x 4050.xlsx")
@@ -429,87 +438,94 @@ def page2():
   
 def page3():
     
-    def create_op_laser(df, n_op, df1):
-        
-            # ======================================= #
-        
-            # Op extraída do lantek
+    def create_op_laser(df, n_op, df1, tipo_chapa):
+            
+        if tipo_chapa == 'Anti derrapante':
+            tipo_chapa = 'A.D'
+        elif tipo_chapa == 'Alta resistência':
+            tipo_chapa = 'A.R'
+        elif tipo_chapa == 'Selecione':
+            tipo_chapa = ''
+            
+        # ======================================= #
     
-            # df = pd.read_excel("OP2416 L1.xlsx")
-            # df1 = pd.read_excel("OP2416 L1.xlsx",sheet_name='Nestings_Cost')
-            #df1 = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx",sheet_name='Nestings_Cost')
-            #n_op = '14979'
+        # Op extraída do lantek
+
+        # df = pd.read_excel("OP2416 L1.xlsx")
+        # df1 = pd.read_excel("OP2416 L1.xlsx",sheet_name='Nestings_Cost')
+        #df1 = pd.read_excel(r"H:\Drives compartilhados\Producao - Cemag\RELATÓRIOS E PROGRAMAS\Laser\op1278 L1.xlsx",sheet_name='Nestings_Cost')
+        #n_op = '14979'
+        
+        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+        worksheet = 'Criadas'
+                    
+        # sh = sa.open_by_key(name_sheet)
+        sh = get_all_records_with_backoff(name_sheet)
+        wks = sh.worksheet(worksheet)
+
+        cell_list = wks.findall(n_op)
+
+        if len(cell_list)==0:
+
+            df = df.dropna(how='all')            
+            df1 = df1.dropna(how='all')            
+
+            qt_chapas = df1[df1.columns[2:3]][3:4]
+            qt_chapas_list = qt_chapas.values.tolist()[0][0]
+
+            try:
+                aprov1 = df1[df1.columns[4:5]][7:8] 
+                aprov2 = df1[df1.columns[4:5]][9:10]
+                aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) )
+            except:
+                aprov1 = df1[df1.columns[2:3]][7:8] 
+                aprov2 = df1[df1.columns[2:3]][9:10]
+                aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) ) 
+
+            df = df[['Unnamed: 1','Unnamed: 4']]
+            df = df.rename(columns={'Unnamed: 1':'Descrição',
+                                    'Unnamed: 4': 'Quantidade'})
+            df = df.dropna(how='all')
+            
+            df = df[10:len(df)-1]
+            
+            df = df.reset_index(drop=True)
+            
+            df['op'] = n_op
+        
+            cols = df.columns.tolist()
+            cols = cols[-1:] + cols[:-1]
+            df = df[cols]
+            
+            df['tamanho da peça'] = ''
+            df['peso'] = ''
+            df['tempo'] = ''
+            #espessura = '14'
+            df['espessura'] = espessura + " " + tipo_chapa
+            df['Aproveitamento'] = aprov_list
+            #tamanho_chapa = '2800,00 x 1500,00 mm'
+            df['Tamanho da chapa'] = tamanho_chapa
+            df['qt. chapas'] = qt_chapas_list
+            df['data criada'] = date.today().strftime('%d/%m/%Y')
+            df['Máquina'] = 'Laser'
+            df['op_espelho'] = ''
+            df['opp'] = 'opp'
+
+            # ======================================= #
+                        
+            # Guardar no banco de dados
             
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
             worksheet = 'Criadas'
-                        
+            
             # sh = sa.open_by_key(name_sheet)
             sh = get_all_records_with_backoff(name_sheet)
-            wks = sh.worksheet(worksheet)
+            df_list = df.values.tolist()
+            sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
 
-            cell_list = wks.findall(n_op)
-
-            if len(cell_list)==0:
-
-                df = df.dropna(how='all')            
-                df1 = df1.dropna(how='all')            
-
-                qt_chapas = df1[df1.columns[2:3]][3:4]
-                qt_chapas_list = qt_chapas.values.tolist()[0][0]
-
-                try:
-                    aprov1 = df1[df1.columns[4:5]][7:8] 
-                    aprov2 = df1[df1.columns[4:5]][9:10]
-                    aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) )
-                except:
-                    aprov1 = df1[df1.columns[2:3]][7:8] 
-                    aprov2 = df1[df1.columns[2:3]][9:10]
-                    aprov_list = str(1 - ( float(aprov2.values.tolist()[0][0]) / float(aprov1.values.tolist()[0][0]) ) ) 
-
-                df = df[['Unnamed: 1','Unnamed: 4']]
-                df = df.rename(columns={'Unnamed: 1':'Descrição',
-                                        'Unnamed: 4': 'Quantidade'})
-                df = df.dropna(how='all')
-                
-                df = df[10:len(df)-1]
-                
-                df = df.reset_index(drop=True)
-                
-                df['op'] = n_op
-            
-                cols = df.columns.tolist()
-                cols = cols[-1:] + cols[:-1]
-                df = df[cols]
-                
-                df['tamanho da peça'] = ''
-                df['peso'] = ''
-                df['tempo'] = ''
-                #espessura = '14'
-                df['espessura'] = espessura
-                df['Aproveitamento'] = aprov_list
-                #tamanho_chapa = '2800,00 x 1500,00 mm'
-                df['Tamanho da chapa'] = tamanho_chapa
-                df['qt. chapas'] = qt_chapas_list
-                df['data criada'] = date.today().strftime('%d/%m/%Y')
-                df['Máquina'] = 'Laser'
-                df['op_espelho'] = ''
-                df['opp'] = 'opp'
-
-                # ======================================= #
-                            
-                # Guardar no banco de dados
-                
-                name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-                worksheet = 'Criadas'
-                
-                # sh = sa.open_by_key(name_sheet)
-                sh = get_all_records_with_backoff(name_sheet)
-                df_list = df.values.tolist()
-                sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
-    
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
-            else:
-                st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já estava aberta!</h2>", unsafe_allow_html=True)
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: green'>OP aberta!</h2>", unsafe_allow_html=True)
+        else:
+            st.markdown("<h2 style='text-align: center; font-size:25px; color: red'>OP já estava aberta!</h2>", unsafe_allow_html=True)
     
     st.markdown("<h2 style='text-align: center; font-size:50px; color: black'>Criar OP - Laser</h2>", unsafe_allow_html=True)
     
@@ -562,6 +578,7 @@ def page3():
     tamanho_chapa = comp +",00 x "+ larg + ",00 mm"
     
     uploaded_file = st.file_uploader("Escolha um arquivo", type="xlsx")
+    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione','Anti derrapante','Alta resistência'))
 
     if uploaded_file:
         df = pd.read_excel(uploaded_file)
@@ -574,12 +591,19 @@ def page3():
         if n_op != '':
         
             if st.button('Gerar OP'):
-                create_op_laser(df, n_op, df1)    
+                create_op_laser(df, n_op, df1, tipo_chapa)    
 
 def page5():
     
-    def create_op_laser2(df, n_op, df2):
+    def create_op_laser2(df, n_op, df2, tipo_chapa):
         
+        if tipo_chapa == 'Anti derrapante':
+            tipo_chapa = 'A.D'
+        elif tipo_chapa == 'Alta resistência':
+            tipo_chapa = 'A.R'
+        elif tipo_chapa == 'Selecione':
+            tipo_chapa = ''
+
         # ======================================= #
     
         # Op extraída do pronest
@@ -596,7 +620,6 @@ def page5():
         # wks2 = sh.worksheet(worksheet2)
         # list2 = get_all_records_with_backoff(wks2)
 
-
         cell_list = wks.findall(n_op)
         # df2 = pd.read_excel(r'op 133 JFY #1,4 1200 x 4050.nrp2.xlsx', sheet_name='AllPartsList')
 
@@ -611,7 +634,7 @@ def page5():
             df2 = df2[1:].reset_index(drop=True)
             df2 = df2[['Part name','Amount:','Part size (mm*mm)']]
 
-            df2['espessura'] = espessura_df
+            df2['espessura'] = espessura_df + " " + tipo_chapa
             df2['aproveitamento'] = aproveitamento_df
             df2['tamanho da chapa'] = tamanho_chapa
             df2['qt. chapas'] = qt_chapa
@@ -658,6 +681,8 @@ def page5():
     
     uploaded_file = st.file_uploader("Escolha um arquivo", type="xlsx")
 
+    tipo_chapa = st.selectbox("Tipo da chapa", ('Selecione', 'Inox', 'Anti derrapante','Alta resistência'))
+
     def extrair_num_op(string):
         # Define a regex que corresponde ao padrão desejado
         match = re.search(r'op\s*(\d+)', string, re.IGNORECASE)
@@ -665,7 +690,7 @@ def page5():
             return match.group(1)
         return None
     
-    if uploaded_file:
+    if uploaded_file and tipo_chapa:
         
         df = pd.read_excel(uploaded_file)
         df2 = pd.read_excel(uploaded_file, sheet_name='AllPartsList')
@@ -677,7 +702,7 @@ def page5():
         if n_op != '':
         
             if st.button('Gerar OP'):
-                create_op_laser2(df, n_op, df2)    
+                create_op_laser2(df, n_op, df2, tipo_chapa)    
 
 def page4():
     
