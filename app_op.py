@@ -730,136 +730,69 @@ def page4():
 
     st.write(tabs_font_css, unsafe_allow_html=True)
 
-    peca = st.text_input("Peça:")
-    multi = '**Para filtrar por mais de um código de peça, separe-os usando vírgulas.** Ex: ***030317,030318,030645***'
-    st.markdown(multi)
-    
-    if peca != '':
+    maquina = st.selectbox(
+        "Escolha a máquina que deseja selecionar",
+            ("Plasma", "Laser", "Laser JYF"),
+        )
 
-        pecas_list = [codigo.strip() for codigo in peca.split(',')]
+    if maquina != '':
 
-        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-        worksheet = 'Criadas'
-
-        # sh = sa.open_by_key(name_sheet)
-        sh = get_all_records_with_backoff(name_sheet)
-        wks = sh.worksheet(worksheet)
-
-        # Obter os registros e convertê-los em DataFrame
-        list1 = wks.get_all_records()
-        table = pd.DataFrame(list1)
-        table = table.drop_duplicates()
-
-        table['op'] = table['op'].astype(str)
-
-        # Filtrar a tabela para incluir apenas as peças especificadas na lista
-        pattern = '|'.join(pecas_list)
-        table = table[table['Peças'].astype(str).str.contains(pattern, regex=True, na=False)]
+        peca = st.text_input("Peça:")
+        multi = '**Para filtrar por mais de um código de peça, separe-os usando vírgulas.** Ex: ***030317,030318,030645***'
+        st.markdown(multi)
         
-        # Filtrar pelo campo 'opp' (opcional, dependendo da sua necessidade)
-        table = table[table['opp'].astype(str).str.contains('opp')]
+        if peca != '':
 
-        # Resetar o índice
-        table = table.reset_index(drop=True)
-
-        # Converter a quantidade de chapa para numérico e ajustar a divisão
-        table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors='coerce')
-        table['qt. chapa'] = table['qt. chapa'] / 100
-
-        # Selecionar as colunas desejadas
-        caract_op = table[['op', 'Tamanho da chapa', 'qt. chapa', 'Espessura','Aproveitamento']]
-
-        op_counts = caract_op.groupby('op').filter(lambda x: len(x) == len(pecas_list))
-
-        op_counts = op_counts.drop_duplicates(subset=['op'])
-
-        # Resetar o índice novamente para facilitar a exibição
-        op_counts = op_counts.reset_index(drop=True)
-        # Configurar a tabela para exibição no AgGrid
-        st.dataframe(op_counts,height=280)
-        # gb = GridOptionsBuilder.from_dataframe(caract_op)
-        # grid_options = gb.build()
-        # grid_response = AgGrid(
-        #     op_counts,
-        #     gridOptions=grid_options,
-        #     width='100%',
-        #     height=400,
-        #     fit_columns_on_grid_load=True,
-        #     update_model='MODEL_CHANGE'
-        # )
-
-        # new_carac = grid_response['data']
-
-    n_op = st.text_input("Op:")
-
-    if n_op != '':
-
-        name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-        worksheet = 'Criadas'
-        
-        # sh = sa.open_by_key(name_sheet)
-        sh = get_all_records_with_backoff(name_sheet)
-        wks = sh.worksheet(worksheet)
-
-        list1 = wks.get_all_records()
-        table = pd.DataFrame(list1)
-        table = table.drop_duplicates()
-        
-        table['op'] = table['op'].astype(str)
-
-        table = table.loc[table['op'] == n_op]
-        table = table.reset_index()
-        
-        table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce') 
-        
-        table['qt. chapa'] = table['qt. chapa'] / 100
-
-        table['Aproveitamento'] = table['Aproveitamento'].astype(str)            
-        table['Aproveitamento'] = table['Aproveitamento'].replace(",00","", regex=True).replace("%","", regex=True).replace("\.","",regex=True).replace(",","",regex=True)
-
-        for i in range(len(table)):
-            if table['Aproveitamento'][i][0] != '0':
-                table['Aproveitamento'][i] = '0.' + table['Aproveitamento'][i]
-
-        table['Aproveitamento'] = pd.to_numeric(table['Aproveitamento'], errors = 'coerce')
-        table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: '0,' + str(x) if x > 1 else x)
-        
-        table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
-
-        maq_antiga = table['maquina'][0]
-        qt_antiga = table['qt. chapa'][0]
-
-        gb = GridOptionsBuilder.from_dataframe(table1)
-        gb.configure_column('Tamanho da chapa', editable=True)
-        gb.configure_column('Espessura', editable=True)
-        gb.configure_column('qt. chapa', editable=True)
-        grid_options = gb.build()
-        grid_response = AgGrid(table1, 
-                                gridOptions=grid_options,
-                                width='100%',
-                                height=400,
-                                fit_columns_on_grid_load = True,
-                                update_model='MODEL_CHANGE\D')
-
-        new_carac = grid_response['data']
-
-        qt_chapa = new_carac['qt. chapa'][0]
-        aproveitamento_espelho = new_carac['Aproveitamento'][0]
-
-        table2 = table.copy()
-
-        try:
-            table2 = table2.set_index('op').filter(like=n_op, axis=0)
-            table2 = table2.reset_index()
-            table2 = table2[['op','Peças', 'Quantidade']]
-            st.dataframe(table2)
-        except:
-            st.text("Op não encontrada")
-
-        if st.button("Duplicar"):
+            pecas_list = [codigo.strip() for codigo in peca.split(',')]
 
             name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
-            worksheet = 'ultima_OP'
+            worksheet = 'Criadas'
+
+            # sh = sa.open_by_key(name_sheet)
+            sh = get_all_records_with_backoff(name_sheet)
+            wks = sh.worksheet(worksheet)
+
+            # Obter os registros e convertê-los em DataFrame
+            list1 = wks.get_all_records()
+            table = pd.DataFrame(list1)
+            table = table.drop_duplicates()
+
+            table['op'] = table['op'].astype(str)
+
+            table = table[table['maquina'] == maquina]
+
+            # Filtrar a tabela para incluir apenas as peças especificadas na lista
+            pattern = '|'.join(pecas_list)
+            table = table[table['Peças'].astype(str).str.contains(pattern, regex=True, na=False)]
+            
+            # Filtrar pelo campo 'opp' (opcional, dependendo da sua necessidade)
+            table = table[table['opp'].astype(str).str.contains('opp')]
+
+            # Resetar o índice
+            table = table.reset_index(drop=True)
+
+            # Converter a quantidade de chapa para numérico e ajustar a divisão
+            table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors='coerce')
+            table['qt. chapa'] = table['qt. chapa'] / 100
+
+            # Selecionar as colunas desejadas
+            caract_op = table[['op', 'Tamanho da chapa', 'qt. chapa', 'Espessura','Aproveitamento']]
+
+            op_counts = caract_op.groupby('op').filter(lambda x: len(x) == len(pecas_list))
+
+            op_counts = op_counts.drop_duplicates(subset=['op'])
+
+            # Resetar o índice novamente para facilitar a exibição
+            op_counts = op_counts.reset_index(drop=True)
+            # Configurar a tabela para exibição no AgGrid
+            st.dataframe(op_counts,height=280)
+
+        n_op = st.text_input("Op:")
+
+        if n_op != '':
+
+            name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+            worksheet = 'Criadas'
             
             # sh = sa.open_by_key(name_sheet)
             sh = get_all_records_with_backoff(name_sheet)
@@ -867,38 +800,102 @@ def page4():
 
             list1 = wks.get_all_records()
             table = pd.DataFrame(list1)
+            table = table.drop_duplicates()
+            
+            table['op'] = table['op'].astype(str)
 
-            ult_op = table['ultima_op'].values.tolist()[0] + 1
-    
-            wks.update('A2', [[ult_op]])
+            table = table.loc[table['op'] == n_op]
+            table = table.reset_index()
             
-            table2['Quantidade'] = table2['Quantidade'].astype(int)
+            table['qt. chapa'] = pd.to_numeric(table['qt. chapa'], errors = 'coerce') 
             
-            table2['op'] = ult_op
-            table2['op'] = table2['op'].astype(str)
-            table2['Quantidade'] = (table2['Quantidade'] / int(qt_antiga)) * int(qt_chapa)
-            table2['Tamanho da peça'] = ''
-            table2['Peso'] = ''
-            table2['Tempo'] = ''
-            table2['Espessura'] = new_carac['Espessura'][0]
-            table2['Aproveitamento'] = aproveitamento_espelho
-            table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
-            table2['qt. chapa'] = new_carac['qt. chapa'].astype(int)[0]
-            table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
-            table2['maquina'] = maq_antiga
-            table2['op_espelho'] = n_op
+            table['qt. chapa'] = table['qt. chapa'] / 100
+
+            table['Aproveitamento'] = table['Aproveitamento'].astype(str)            
+            table['Aproveitamento'] = table['Aproveitamento'].replace(",00","", regex=True).replace("%","", regex=True).replace("\.","",regex=True).replace(",","",regex=True)
+
+            for i in range(len(table)):
+                if table['Aproveitamento'][i][0] != '0':
+                    table['Aproveitamento'][i] = '0.' + table['Aproveitamento'][i]
+
+            table['Aproveitamento'] = pd.to_numeric(table['Aproveitamento'], errors = 'coerce')
+            table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: '0,' + str(x) if x > 1 else x)
             
-            worksheet = 'Criadas'
-            
-            # sh = sa.open_by_key(name_sheet)
-            sh = get_all_records_with_backoff(name_sheet)
-            
-            df_list = table2.values.tolist()
-            
-            sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
-            
-            st.title('Número da nova op: ' + str(ult_op))
-    
+            table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
+
+            maq_antiga = table['maquina'][0]
+            qt_antiga = table['qt. chapa'][0]
+
+            gb = GridOptionsBuilder.from_dataframe(table1)
+            gb.configure_column('Tamanho da chapa', editable=True)
+            gb.configure_column('Espessura', editable=True)
+            gb.configure_column('qt. chapa', editable=True)
+            grid_options = gb.build()
+            grid_response = AgGrid(table1, 
+                                    gridOptions=grid_options,
+                                    width='100%',
+                                    height=400,
+                                    fit_columns_on_grid_load = True,
+                                    update_model='MODEL_CHANGE\D')
+
+            new_carac = grid_response['data']
+
+            qt_chapa = new_carac['qt. chapa'][0]
+            aproveitamento_espelho = new_carac['Aproveitamento'][0]
+
+            table2 = table.copy()
+
+            try:
+                table2 = table2.set_index('op').filter(like=n_op, axis=0)
+                table2 = table2.reset_index()
+                table2 = table2[['op','Peças', 'Quantidade']]
+                st.dataframe(table2)
+            except:
+                st.text("Op não encontrada")
+
+            if st.button("Duplicar"):
+
+                name_sheet = '1t7Q_gwGVAEwNlwgWpLRVy-QbQo7kQ_l6QTjFjBrbWxE'
+                worksheet = 'ultima_OP'
+                
+                # sh = sa.open_by_key(name_sheet)
+                sh = get_all_records_with_backoff(name_sheet)
+                wks = sh.worksheet(worksheet)
+
+                list1 = wks.get_all_records()
+                table = pd.DataFrame(list1)
+
+                ult_op = table['ultima_op'].values.tolist()[0] + 1
+        
+                wks.update('A2', [[ult_op]])
+                
+                table2['Quantidade'] = table2['Quantidade'].astype(int)
+                
+                table2['op'] = ult_op
+                table2['op'] = table2['op'].astype(str)
+                table2['Quantidade'] = (table2['Quantidade'] / int(qt_antiga)) * int(qt_chapa)
+                table2['Tamanho da peça'] = ''
+                table2['Peso'] = ''
+                table2['Tempo'] = ''
+                table2['Espessura'] = new_carac['Espessura'][0]
+                table2['Aproveitamento'] = aproveitamento_espelho
+                table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
+                table2['qt. chapa'] = new_carac['qt. chapa'].astype(int)[0]
+                table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
+                table2['maquina'] = maq_antiga
+                table2['op_espelho'] = n_op
+                
+                worksheet = 'Criadas'
+                
+                # sh = sa.open_by_key(name_sheet)
+                sh = get_all_records_with_backoff(name_sheet)
+                
+                df_list = table2.values.tolist()
+                
+                sh.values_append(worksheet, {'valueInputOption': 'RAW'}, {'values': df_list})
+                
+                st.title('Número da nova op: ' + str(ult_op))
+        
 # Página inicial, login e senha
 menu = ["Página inicial","Login","Crie uma conta nova"] 
 choice = st.sidebar.selectbox("Menu",menu)
