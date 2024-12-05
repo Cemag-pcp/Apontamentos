@@ -803,6 +803,8 @@ def page4():
             list1 = wks.get_all_records()
             table = pd.DataFrame(list1)
             table = table.drop_duplicates()
+
+            table.columns = table.columns.str.lower()
             
             table['op'] = table['op'].astype(str)
 
@@ -866,6 +868,8 @@ def page4():
 
                 list1 = wks.get_all_records()
                 table = pd.DataFrame(list1)
+
+                table.columns = table.columns.str.lower()
 
                 ult_op = table['ultima_op'].values.tolist()[0] + 1
         
