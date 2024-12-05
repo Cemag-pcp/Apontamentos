@@ -757,13 +757,15 @@ def page4():
             table = pd.DataFrame(list1)
             table = table.drop_duplicates()
 
+            table.columns = table.columns.str.lower()
+
             table['op'] = table['op'].astype(str)
 
             table = table[table['maquina'] == maquina]
 
             # Filtrar a tabela para incluir apenas as peças especificadas na lista
             pattern = '|'.join(pecas_list)
-            table = table[table['Peças'].astype(str).str.contains(pattern, regex=True, na=False)]
+            table = table[table['peças'].astype(str).str.contains(pattern, regex=True, na=False)]
             
             # Filtrar pelo campo 'opp' (opcional, dependendo da sua necessidade)
             table = table[table['opp'].astype(str).str.contains('opp')]
@@ -776,7 +778,7 @@ def page4():
             table['qt. chapa'] = table['qt. chapa'] / 100
 
             # Selecionar as colunas desejadas
-            caract_op = table[['op', 'Tamanho da chapa', 'qt. chapa', 'Espessura','Aproveitamento']]
+            caract_op = table[['op', 'tamanho da chapa', 'qt. chapa', 'espessura','aproveitamento']]
 
             op_counts = caract_op.groupby('op').filter(lambda x: len(x) == len(pecas_list))
 
@@ -811,24 +813,24 @@ def page4():
             
             table['qt. chapa'] = table['qt. chapa'] / 100
 
-            table['Aproveitamento'] = table['Aproveitamento'].astype(str)            
-            table['Aproveitamento'] = table['Aproveitamento'].replace(",00","", regex=True).replace("%","", regex=True).replace("\.","",regex=True).replace(",","",regex=True)
+            table['aproveitamento'] = table['aproveitamento'].astype(str)            
+            table['aproveitamento'] = table['aproveitamento'].replace(",00","", regex=True).replace("%","", regex=True).replace("\.","",regex=True).replace(",","",regex=True)
 
             for i in range(len(table)):
-                if table['Aproveitamento'][i][0] != '0':
-                    table['Aproveitamento'][i] = '0.' + table['Aproveitamento'][i]
+                if table['aproveitamento'][i][0] != '0':
+                    table['aproveitamento'][i] = '0.' + table['aproveitamento'][i]
 
-            table['Aproveitamento'] = pd.to_numeric(table['Aproveitamento'], errors = 'coerce')
-            table['Aproveitamento'] = table['Aproveitamento'].apply(lambda x: '0,' + str(x) if x > 1 else x)
+            table['aproveitamento'] = pd.to_numeric(table['aproveitamento'], errors = 'coerce')
+            table['aproveitamento'] = table['aproveitamento'].apply(lambda x: '0,' + str(x) if x > 1 else x)
             
-            table1 = table[['Tamanho da chapa','Espessura','qt. chapa','maquina','Aproveitamento']][:1]
+            table1 = table[['tamanho da chapa','espessura','qt. chapa','maquina','aproveitamento']][:1]
 
             maq_antiga = table['maquina'][0]
             qt_antiga = table['qt. chapa'][0]
 
             gb = GridOptionsBuilder.from_dataframe(table1)
-            gb.configure_column('Tamanho da chapa', editable=True)
-            gb.configure_column('Espessura', editable=True)
+            gb.configure_column('tamanho da chapa', editable=True)
+            gb.configure_column('espessura', editable=True)
             gb.configure_column('qt. chapa', editable=True)
             grid_options = gb.build()
             grid_response = AgGrid(table1, 
@@ -841,14 +843,14 @@ def page4():
             new_carac = grid_response['data']
 
             qt_chapa = new_carac['qt. chapa'][0]
-            aproveitamento_espelho = new_carac['Aproveitamento'][0]
+            aproveitamento_espelho = new_carac['aproveitamento'][0]
 
             table2 = table.copy()
 
             try:
                 table2 = table2.set_index('op').filter(like=n_op, axis=0)
                 table2 = table2.reset_index()
-                table2 = table2[['op','Peças', 'Quantidade']]
+                table2 = table2[['op','peças', 'quantidade']]
                 st.dataframe(table2)
             except:
                 st.text("Op não encontrada")
@@ -869,19 +871,19 @@ def page4():
         
                 wks.update('A2', [[ult_op]])
                 
-                table2['Quantidade'] = table2['Quantidade'].astype(int)
+                table2['quantidade'] = table2['quantidade'].astype(int)
                 
                 table2['op'] = ult_op
                 table2['op'] = table2['op'].astype(str)
-                table2['Quantidade'] = (table2['Quantidade'] / int(qt_antiga)) * int(qt_chapa)
-                table2['Tamanho da peça'] = ''
-                table2['Peso'] = ''
-                table2['Tempo'] = ''
-                table2['Espessura'] = new_carac['Espessura'][0]
-                table2['Aproveitamento'] = aproveitamento_espelho
-                table2['Tamanho da chapa'] = new_carac['Tamanho da chapa'][0]
+                table2['quantidade'] = (table2['quantidade'] / int(qt_antiga)) * int(qt_chapa)
+                table2['tamanho da peça'] = ''
+                table2['peso'] = ''
+                table2['tempo'] = ''
+                table2['espessura'] = new_carac['espessura'][0]
+                table2['aproveitamento'] = aproveitamento_espelho
+                table2['tamanho da peça'] = new_carac['tamanho da peça'][0]
                 table2['qt. chapa'] = new_carac['qt. chapa'].astype(int)[0]
-                table2['Data abertura de op'] = date.today().strftime('%d/%m/%Y')
+                table2['data abertura de op'] = date.today().strftime('%d/%m/%Y')
                 table2['maquina'] = maq_antiga
                 table2['op_espelho'] = n_op
                 
