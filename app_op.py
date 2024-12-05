@@ -871,12 +871,16 @@ def page4():
 
                 table.columns = table.columns.str.lower()
 
+                print(table.columns)
+
                 ult_op = table['ultima_op'].values.tolist()[0] + 1
         
                 wks.update('A2', [[ult_op]])
                 
                 table2['quantidade'] = table2['quantidade'].astype(int)
                 
+                print(table2)
+
                 table2['op'] = ult_op
                 table2['op'] = table2['op'].astype(str)
                 table2['quantidade'] = (table2['quantidade'] / int(qt_antiga)) * int(qt_chapa)
@@ -885,7 +889,7 @@ def page4():
                 table2['tempo'] = ''
                 table2['espessura'] = new_carac['espessura'][0]
                 table2['aproveitamento'] = aproveitamento_espelho
-                table2['tamanho da peça'] = new_carac['tamanho da peça'][0]
+                table2['tamanho da chapa'] = new_carac['tamanho da chapa'][0]
                 table2['qt. chapa'] = new_carac['qt. chapa'].astype(int)[0]
                 table2['data abertura de op'] = date.today().strftime('%d/%m/%Y')
                 table2['maquina'] = maq_antiga
